@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日やること</title>
+<script src="data.js"></script>
+<style>
+  :root {
+    --color-bg: #f5f6fa;
+    --color-card: #ffffff;
+    --color-border: #e0e4ef;
+    --color-primary: #3a6fd8;
+    --color-primary-light: #eaf0fb;
+    --color-overdue: #e53935;
+    --color-overdue-bg: #fff5f5;
+    --color-urgent: #f57c00;
+    --color-urgent-bg: #fff8f0;
+    --color-soon: #f9a825;
+    --color-soon-bg: #fffde7;
+    --color-done: #9e9e9e;
+    --color-done-bg: #f5f5f5;
+    --color-normal: #3a6fd8;
+    --color-normal-bg: #eaf0fb;
+    --color-today: #7b1fa2;
+    --color-memo-bg: #fffde7;
+    --color-text: #2c3e50;
+    --color-text-sub: #6b7a99;
+    --radius: 10px;
+    --shadow: 0 2px 8px rgba(60,80,140,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Yu Gothic UI', 'Meiryo', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* Header */
+  .page-header {
+    background: linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%);
+    color: white;
+    padding: 20px 24px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .page-header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .back-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.15s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.3); }
+
+  /* Progress bar */
+  .progress-section {
+    background: white;
+    border-bottom: 1px solid var(--color-border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .progress-label {
+    font-size: 0.9rem;
+    color: var(--color-text-sub);
+    white-space: nowrap;
+  }
+  .progress-count {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-today);
+    white-space: nowrap;
+  }
+  .progress-bar-wrap {
+    flex: 1;
+    height: 10px;
+    background: #ede7f6;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7b1fa2, #ab47bc);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-done-label {
+    font-size: 0.85rem;
+    color: var(--color-text-sub);
+    white-space: nowrap;
+  }
+
+  /* Content */
+  .content {
+    max-width: 720px;
+    margin: 24px auto;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--color-text-sub);
+  }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 1rem; line-height: 1.8; }
+  .empty-state a {
+    display: inline-block;
+    margin-top: 16px;
+    background: var(--color-primary);
+    color: white;
+    padding: 10px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+
+  /* Task card */
+  .task-card {
+    background: var(--color-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+    transition: box-shadow 0.15s;
+  }
+  .task-card:hover { box-shadow: 0 4px 16px rgba(60,80,140,0.12); }
+  .task-card.is-done {
+    background: var(--color-done-bg);
+    border-color: #ddd;
+    opacity: 0.75;
+  }
+  .task-card.is-overdue { border-left: 4px solid var(--color-overdue); }
+  .task-card.is-urgent  { border-left: 4px solid var(--color-urgent); }
+  .task-card.is-soon    { border-left: 4px solid var(--color-soon); }
+  .task-card.is-normal  { border-left: 4px solid var(--color-primary); }
+  .task-card.is-done    { border-left: 4px solid var(--color-done); }
+
+  .task-head {
+    padding: 14px 16px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .task-head-left {
+    flex: 1;
+    min-width: 0;
+  }
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+  .badge {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-status-overdue  { background: var(--color-overdue); color: white; }
+  .badge-status-urgent   { background: var(--color-urgent);  color: white; }
+  .badge-status-soon     { background: var(--color-soon);    color: #333; }
+  .badge-status-normal   { background: var(--color-normal-bg); color: var(--color-primary); border: 1px solid #c5d5f5; }
+  .badge-status-done     { background: var(--color-done-bg); color: var(--color-done); border: 1px solid #ddd; }
+  .badge-category { background: #e8eaf6; color: #3949ab; }
+
+  .task-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    line-height: 1.4;
+    word-break: break-all;
+  }
+  .task-card.is-done .task-title { text-decoration: line-through; color: var(--color-done); }
+
+  .task-meta {
+    font-size: 0.8rem;
+    color: var(--color-text-sub);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .meta-deadline { font-weight: 600; }
+  .meta-deadline.overdue { color: var(--color-overdue); }
+  .meta-deadline.soon    { color: var(--color-urgent); }
+
+  .task-head-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .chevron {
+    font-size: 0.8rem;
+    color: var(--color-text-sub);
+    transition: transform 0.2s;
+  }
+  .task-card.open .chevron { transform: rotate(180deg); }
+
+  .btn-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .btn-complete {
+    font-size: 0.78rem;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+  .btn-complete:hover { opacity: 0.85; }
+  .btn-complete.to-done  { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .btn-complete.to-undo  { background: #fce4ec; color: #c62828; border: 1px solid #ef9a9a; }
+
+  .btn-remove-today {
+    font-size: 0.78rem;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid #ce93d8;
+    background: #f3e5f5;
+    color: #7b1fa2;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+  .btn-remove-today:hover { opacity: 0.8; }
+
+  /* Task body */
+  .task-body {
+    display: none;
+    padding: 0 16px 14px;
+    border-top: 1px solid var(--color-border);
+  }
+  .task-card.open .task-body { display: block; }
+
+  .task-notes {
+    font-size: 0.85rem;
+    color: #444;
+    white-space: pre-line;
+    line-height: 1.7;
+    padding: 10px 0 6px;
+  }
+
+  .source-label {
+    font-size: 0.78rem;
+    color: var(--color-text-sub);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #eee;
+  }
+
+  /* Memo area */
+  .memo-area {
+    margin-top: 10px;
+    background: var(--color-memo-bg);
+    border: 1px solid #ffe082;
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .memo-area-label {
+    font-size: 0.78rem;
+    color: #795548;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .memo-textarea {
+    width: 100%;
+    min-height: 80px;
+    border: 1px solid #ffd54f;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    resize: vertical;
+    background: #fffff8;
+    color: var(--color-text);
+    outline: none;
+  }
+  .memo-textarea:focus { border-color: #f9a825; box-shadow: 0 0 0 2px rgba(249,168,37,0.2); }
+  .memo-save-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+  }
+  .btn-save-memo {
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid #ffd54f;
+    background: #fff9c4;
+    color: #795548;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.15s;
+  }
+  .btn-save-memo:hover { opacity: 0.8; }
+  .memo-saved-msg {
+    font-size: 0.78rem;
+    color: #2e7d32;
+    display: none;
+  }
+
+  /* Section heading */
+  .section-heading {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-sub);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    padding: 0 4px;
+  }
+
+  /* Date header */
+  .today-date {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--color-text-sub);
+    padding: 8px 0 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <a href="index.html" class="back-btn">← タスク一覧</a>
+  <h1>⭐ 今日やること</h1>
+</div>
+
+<div class="progress-section" id="progressSection">
+  <div class="progress-count" id="progressCount">0/0</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+  </div>
+  <div class="progress-done-label" id="progressDoneLabel">完了 0件</div>
+</div>
+
+<div class="content" id="content"></div>
+
+<script>
+const LS_STATE = 'workplace_report_states_v1';
+const LS_TODAY = 'workplace_today_v1';
+const LS_MEMO  = 'workplace_memos_v1';
+
+function lsGet(key) { try { return JSON.parse(localStorage.getItem(key)||'{}'); } catch(e) { return {}; } }
+function lsSet(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+function isDone(id)       { return lsGet(LS_STATE)[id] === '完了'; }
+function isTodayTask(id)  { return !!lsGet(LS_TODAY)[id]; }
+function getMemo(id)      { return lsGet(LS_MEMO)[id] || ''; }
+
+function setDone(id, done) {
+  const s = lsGet(LS_STATE);
+  if (done) s[id] = '完了'; else delete s[id];
+  lsSet(LS_STATE, s);
+}
+function removeToday(id) {
+  const s = lsGet(LS_TODAY);
+  delete s[id];
+  lsSet(LS_TODAY, s);
+}
+function saveMemo(id) {
+  const ta = document.getElementById('memo-ta-' + id);
+  if (!ta) return;
+  const text = ta.value.trim();
+  const s = lsGet(LS_MEMO);
+  if (text) s[id] = text; else delete s[id];
+  lsSet(LS_MEMO, s);
+  const msg = document.getElementById('memo-saved-' + id);
+  if (msg) { msg.style.display = 'inline'; setTimeout(() => msg.style.display = 'none', 2000); }
+}
+
+function taskState(task) {
+  if (isDone(task.id)) return 'done';
+  if (!task.deadline) return task.urgent ? 'urgent' : 'normal';
+  const now = new Date();
+  const dl = new Date(task.deadline);
+  const diffDays = (dl - now) / 86400000;
+  if (diffDays < 0)   return 'overdue';
+  if (diffDays < 1)   return 'urgent';
+  if (diffDays <= 3)  return 'soon';
+  return 'normal';
+}
+
+function stateLabel(state) {
+  return { overdue:'期限切れ・未対応', urgent:'本日締切', soon:'まもなく締切', normal:'未対応', done:'完了' }[state];
+}
+function stateBadgeClass(state) {
+  return 'badge badge-status-' + state;
+}
+
+function formatDeadline(dl) {
+  if (!dl) return null;
+  const d = new Date(dl);
+  const mm = d.getMonth() + 1;
+  const dd = d.getDate();
+  const hh = d.getHours();
+  const mi = String(d.getMinutes()).padStart(2,'0');
+  const hasTime = hh !== 0 || mi !== '00';
+  const dow = ['日','月','火','水','木','金','土'][d.getDay()];
+  return `${mm}/${dd}(${dow})` + (hasTime ? ` ${hh}:${mi}` : '') + ' 期限';
+}
+
+function formatToday() {
+  const d = new Date();
+  const dow = ['日','月','火','水','木','金','土'][d.getDay()];
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日(${dow})`;
+}
+
+function toggleCard(id) {
+  const card = document.getElementById('card-' + id);
+  if (card) card.classList.toggle('open');
+}
+
+function toggleMemoArea(id) {
+  const card = document.getElementById('card-' + id);
+  const area = document.getElementById('memo-area-' + id);
+  if (!area) return;
+  if (area.style.display === 'none' || area.style.display === '') {
+    if (card && !card.classList.contains('open')) card.classList.add('open');
+    area.style.display = 'block';
+  } else {
+    area.style.display = 'none';
+  }
+}
+
+function handleComplete(id) {
+  setDone(id, !isDone(id));
+  renderAll();
+}
+
+function handleRemoveToday(id) {
+  removeToday(id);
+  renderAll();
+}
+
+function renderProgress(todayTasks) {
+  const total = todayTasks.length;
+  const done  = todayTasks.filter(t => isDone(t.id)).length;
+  const pct   = total > 0 ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressCount').textContent = `${done}/${total}`;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressDoneLabel').textContent = `完了 ${done}件`;
+}
+
+function renderAll() {
+  const todayIds = lsGet(LS_TODAY);
+  const todayTasks = APP_DATA.tasks.filter(t => todayIds[t.id]);
+
+  renderProgress(todayTasks);
+
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+
+  if (todayTasks.length === 0) {
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">⭐</div>
+        <p>今日やることが登録されていません。<br>タスク一覧から ⭐ を押して追加してください。</p>
+        <a href="index.html">← タスク一覧へ</a>
+      </div>`;
+    return;
+  }
+
+  // date
+  const dateEl = document.createElement('div');
+  dateEl.className = 'today-date';
+  dateEl.textContent = formatToday();
+  content.appendChild(dateEl);
+
+  // sort: not done first, then by deadline
+  const sorted = [...todayTasks].sort((a, b) => {
+    const da = isDone(a.id) ? 1 : 0;
+    const db = isDone(b.id) ? 1 : 0;
+    if (da !== db) return da - db;
+    if (a.deadline && b.deadline) return new Date(a.deadline) - new Date(b.deadline);
+    if (a.deadline) return -1;
+    if (b.deadline) return 1;
+    return 0;
+  });
+
+  sorted.forEach(task => {
+    const state = taskState(task);
+    const done  = isDone(task.id);
+    const dl    = task.deadline ? formatDeadline(task.deadline) : null;
+    const dlClass = (state === 'overdue' || state === 'urgent') ? 'overdue' : (state === 'soon' ? 'soon' : '');
+    const memo  = getMemo(task.id);
+    const hasMemo = !!memo;
+
+    const card = document.createElement('div');
+    card.className = `task-card is-${state}`;
+    card.id = 'card-' + task.id;
+
+    card.innerHTML = `
+      <div class="task-head" onclick="toggleCard('${task.id}')">
+        <div class="task-head-left">
+          <div class="badge-row">
+            <span class="${stateBadgeClass(state)}">${stateLabel(state)}</span>
+            ${task.category ? `<span class="badge badge-category">${task.category}</span>` : ''}
+          </div>
+          <div class="task-title">${task.title}</div>
+          <div class="task-meta">
+            ${dl ? `<span class="meta-deadline ${dlClass}">📅 ${dl}</span>` : ''}
+            ${task.source ? `<span>📨 ${task.source}</span>` : ''}
+          </div>
+        </div>
+        <div class="task-head-right" onclick="event.stopPropagation()">
+          <div class="btn-row">
+            <button class="btn-remove-today" onclick="handleRemoveToday('${task.id}')">✕ 外す</button>
+            <button class="btn-complete ${done ? 'to-undo' : 'to-done'}" onclick="handleComplete('${task.id}')">
+              ${done ? '↩ 戻す' : '✓ 完了'}
+            </button>
+          </div>
+          <div class="btn-row">
+            <button class="btn-save-memo" onclick="toggleMemoArea('${task.id}')" style="background:#f3e5f5;border-color:#ce93d8;color:#7b1fa2;">📝 メモ${hasMemo ? '✓' : ''}</button>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="task-body">
+        ${task.notes ? `<div class="task-notes">${task.notes.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : ''}
+        <div class="memo-area" id="memo-area-${task.id}" style="display:${hasMemo ? 'block' : 'none'}">
+          <div class="memo-area-label">📝 メモ</div>
+          <textarea class="memo-textarea" id="memo-ta-${task.id}" placeholder="メモを入力（Ctrl+Enter で保存）"
+            onkeydown="if(event.ctrlKey&&event.key==='Enter'){saveMemo('${task.id}');}"
+          >${escapeHtml(memo)}</textarea>
+          <div class="memo-save-row">
+            <button class="btn-save-memo" onclick="saveMemo('${task.id}')">保存</button>
+            <span class="memo-saved-msg" id="memo-saved-${task.id}">保存済 ✓</span>
+          </div>
+        </div>
+        ${task.sourceFile ? `<div class="source-label">📂 ${task.sourceFile}</div>` : ''}
+      </div>
+    `;
+
+    content.appendChild(card);
+  });
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+renderAll();
+</script>
+</body>
+</html>
