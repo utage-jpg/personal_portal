@@ -746,6 +746,131 @@ body {
 
 .empty-state { text-align: center; padding: 36px; color: var(--muted); font-size: 13px; }
 
+/* ============================================================
+   Today Section (インライン表示)
+   ============================================================ */
+.today-progress-bar {
+  background: var(--surface);
+  border: 1px solid var(--today-bd);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-card);
+}
+.today-progress-count {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--today-c);
+  white-space: nowrap;
+  line-height: 1;
+  min-width: 48px;
+  text-align: center;
+}
+.today-progress-label {
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  margin-top: 2px;
+  text-align: center;
+}
+.today-progress-track {
+  flex: 1;
+  height: 8px;
+  background: var(--today-bd);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.today-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--today-c), #fb923c);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+.today-progress-done-label {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  font-weight: 600;
+}
+.today-task-list { display: flex; flex-direction: column; gap: 10px; }
+
+/* ============================================================
+   タスク一覧 折りたたみセクション
+   ============================================================ */
+.tasks-section-wrap {
+  margin-top: 24px;
+}
+.tasks-collapse-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s, border-color .15s;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  width: 100%;
+  font-family: inherit;
+}
+.tasks-collapse-header:hover {
+  background: var(--indigo-lt);
+  border-color: var(--indigo-bd);
+  color: var(--indigo);
+}
+.tasks-collapse-header.open {
+  border-radius: var(--radius) var(--radius) 0 0;
+  border-bottom-color: transparent;
+  background: var(--indigo-lt);
+  border-color: var(--indigo-bd);
+  color: var(--indigo);
+}
+.tasks-collapse-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.tasks-collapse-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-left: 4px;
+}
+.tasks-collapse-count .tc-badge {
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.tasks-collapse-chevron {
+  color: var(--muted-lt);
+  transition: transform .2s;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+.tasks-collapse-chevron.open { transform: rotate(180deg); }
+.tasks-collapse-body {
+  display: none;
+  border: 1.5px solid var(--indigo-bd);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 16px;
+  background: var(--surface);
+}
+.tasks-collapse-body.open { display: block; }
+
 /* 完了済みトグル */
 .done-toggle-btn {
   width: 100%;
@@ -929,7 +1054,7 @@ body {
   <a href="https://ksknetjp.sharepoint.com/school/2019/Forms/AllItems.aspx" target="_blank" class="qlink" title="学院資料（SharePoint）">
     <span class="q-badge" style="background:#d97706">資</span><span class="q-label">学院資料</span>
   </a>
-  <a href="schedule.html" class="qlink" title="年間時間表（ローカル）">
+  <a href="https://utage-jpg.github.io/timetable/" target="_blank" class="qlink" title="年間時間表">
     <span class="q-badge" style="background:#059669">年</span><span class="q-label">年間表</span>
   </a>
   <div class="qbar-sep"></div>
@@ -987,7 +1112,7 @@ body {
         今日やること
         <span class="today-count-badge" id="todayCountBadge">0</span>
       </a>
-      <a href="schedule.html" class="sidebar-link-btn secondary">
+      <a href="https://utage-jpg.github.io/timetable/" target="_blank" class="sidebar-link-btn secondary">
         年間時間表
       </a>
       <a href="../【職場】攻略web管理/index.html" target="_blank" class="sidebar-link-btn secondary">
@@ -1000,22 +1125,52 @@ body {
   </aside>
 
   <main class="main-col">
+
+    <!-- ── 今日やること ── -->
     <div class="section-title" style="display:flex;align-items:center;">
-      タスク一覧
-      <button class="add-task-btn" onclick="openAddTaskModal()">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        追加
-      </button>
+      今日やること
     </div>
-    <div class="task-list" id="taskList"></div>
-    <div id="doneToggleWrap" style="display:none; margin-top:16px;">
-      <button id="doneToggleBtn" onclick="toggleDoneVisible()" class="done-toggle-btn">
-        <span id="doneToggleLabel">完了済みを表示</span>
-        <span id="doneToggleCount" class="done-toggle-count"></span>
-        <span id="doneToggleChevron" class="done-toggle-chevron">${IC_CHEVRON}</span>
-      </button>
-      <div id="doneList" class="task-list" style="display:none; margin-top:8px;"></div>
+    <div class="today-progress-bar">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="today-progress-count" id="todayProgressCount">0/0</div>
+        <div class="today-progress-label">完了/合計</div>
+      </div>
+      <div class="today-progress-track">
+        <div class="today-progress-fill" id="todayProgressFill" style="width:0%"></div>
+      </div>
+      <div class="today-progress-done-label" id="todayProgressDoneLabel">完了 0件</div>
     </div>
+    <div class="today-task-list" id="todayTaskList"></div>
+
+    <!-- ── タスク一覧（プルダウン） ── -->
+    <div class="tasks-section-wrap">
+      <button class="tasks-collapse-header" id="tasksCollapseHeader" onclick="toggleTasksSection()">
+        <div class="tasks-collapse-header-left">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+          タスク一覧
+          <span class="tasks-collapse-count" id="tasksCollapseCount"></span>
+        </div>
+        <button class="add-task-btn" onclick="event.stopPropagation();openAddTaskModal()" style="margin-left:0;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          追加
+        </button>
+        <span class="tasks-collapse-chevron" id="tasksCollapseChevron">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </button>
+      <div class="tasks-collapse-body" id="tasksCollapseBody">
+        <div class="task-list" id="taskList"></div>
+        <div id="doneToggleWrap" style="display:none; margin-top:16px;">
+          <button id="doneToggleBtn" onclick="toggleDoneVisible()" class="done-toggle-btn">
+            <span id="doneToggleLabel">完了済みを表示</span>
+            <span id="doneToggleCount" class="done-toggle-count"></span>
+            <span id="doneToggleChevron" class="done-toggle-chevron">${IC_CHEVRON}</span>
+          </button>
+          <div id="doneList" class="task-list" style="display:none; margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -1437,10 +1592,80 @@ function renderNotices() {
 }
 
 // ============================================================
+// Today Section (インライン)
+// ============================================================
+function renderTodaySection() {
+  const todayIds  = lsGet(LS_TODAY);
+  const todayTasks = APP_DATA.tasks.filter(t => todayIds[t.id]);
+  const total = todayTasks.length;
+  const done  = todayTasks.filter(t => taskState(t) === 'done').length;
+  const pct   = total > 0 ? Math.round(done / total * 100) : 0;
+
+  const countEl = document.getElementById('todayProgressCount');
+  const fillEl  = document.getElementById('todayProgressFill');
+  const doneEl  = document.getElementById('todayProgressDoneLabel');
+  if (countEl) countEl.textContent = `${done}/${total}`;
+  if (fillEl)  fillEl.style.width  = pct + '%';
+  if (doneEl)  doneEl.textContent  = `完了 ${done}件`;
+
+  const list = document.getElementById('todayTaskList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  if (todayTasks.length === 0) {
+    list.innerHTML = '<div class="empty-state">今日やることが登録されていません。<br>タスク一覧から ⭐ を押して追加してください。</div>';
+    return;
+  }
+
+  const sorted = [...todayTasks].sort((a, b) => {
+    const da = taskState(a) === 'done' ? 1 : 0;
+    const db = taskState(b) === 'done' ? 1 : 0;
+    if (da !== db) return da - db;
+    if (a.deadline && b.deadline) return new Date(a.deadline) - new Date(b.deadline);
+    if (a.deadline) return -1;
+    if (b.deadline) return 1;
+    return 0;
+  });
+  sorted.forEach(t => list.appendChild(buildTaskCard(t)));
+}
+
+// ============================================================
+// タスク一覧 折りたたみトグル
+// ============================================================
+let _tasksSectionOpen = false;
+function toggleTasksSection() {
+  _tasksSectionOpen = !_tasksSectionOpen;
+  const header  = document.getElementById('tasksCollapseHeader');
+  const body    = document.getElementById('tasksCollapseBody');
+  const chevron = document.getElementById('tasksCollapseChevron');
+  header.classList.toggle('open', _tasksSectionOpen);
+  body.classList.toggle('open', _tasksSectionOpen);
+  chevron.classList.toggle('open', _tasksSectionOpen);
+}
+
+function updateTasksCollapseCount() {
+  const active   = APP_DATA.tasks.filter(t => taskState(t) !== 'done');
+  const overdue  = active.filter(t => taskState(t) === 'overdue').length;
+  const urgent   = active.filter(t => taskState(t) === 'urgent').length;
+  const soon     = active.filter(t => taskState(t) === 'soon').length;
+  const normal   = active.filter(t => taskState(t) === 'normal').length;
+  const done     = APP_DATA.tasks.filter(t => taskState(t) === 'done').length;
+
+  const el = document.getElementById('tasksCollapseCount');
+  if (!el) return;
+  let html = `<span>未対応 ${active.length}件</span>`;
+  if (overdue > 0) html += `<span class="tc-badge b-overdue">${overdue}</span>`;
+  if (urgent  > 0) html += `<span class="tc-badge b-urgent">${urgent}</span>`;
+  if (soon    > 0) html += `<span class="tc-badge b-soon">${soon}</span>`;
+  el.innerHTML = html;
+}
+
+// ============================================================
 // Render All
 // ============================================================
 function renderAll() {
   renderHeader(); renderSubheader(); renderTasks(); renderCalendar(); renderNotices();
+  renderTodaySection(); updateTasksCollapseCount();
 }
 
 // ============================================================
