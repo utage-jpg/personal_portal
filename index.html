@@ -348,8 +348,8 @@ body {
   margin-bottom: 6px;
   letter-spacing: .04em;
 }
-.cal-weekdays span:nth-child(6) { color: #3b82f6; }
-.cal-weekdays span:nth-child(7) { color: var(--rose); }
+.cal-weekdays span:nth-child(1) { color: var(--rose); }
+.cal-weekdays span:nth-child(7) { color: #3b82f6; }
 
 .cal-grid {
   display: grid;
@@ -474,198 +474,175 @@ body {
 }
 
 /* ============================================================
-   Task Cards
+   今日やること — チェックリスト
    ============================================================ */
-.task-list  { display: flex; flex-direction: column; gap: 10px; }
-.task-card  {
-  background: var(--surface);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  border-top: 3px solid var(--border);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
-  transition: box-shadow .2s, transform .15s, border-top-color .15s;
-}
-.task-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-.task-card.s-overdue { border-top-color: var(--overdue);  background: var(--overdue-bg); }
-.task-card.s-urgent  { border-top-color: var(--urgent);   background: var(--urgent-bg); }
-.task-card.s-soon    { border-top-color: var(--amber); }
-.task-card.s-normal  { border-top-color: var(--indigo); }
-.task-card.s-done    { border-top-color: var(--emerald); opacity: .6; }
-
-.task-head {
-  padding: 13px 16px;
-  cursor: pointer;
+.todo-list { list-style: none; display: flex; flex-direction: column; }
+.todo-item {
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  user-select: none;
-}
-.task-head-left { flex: 1; min-width: 0; }
-.task-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; align-items: center; }
-.badge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 99px;
-  white-space: nowrap;
-  letter-spacing: .02em;
-}
-.b-overdue { background: var(--overdue); color: #fff; }
-.b-urgent  { background: var(--urgent);  color: #fff; }
-.b-soon    { background: var(--amber);   color: #fff; }
-.b-normal  { background: var(--indigo);  color: #fff; }
-.b-done    { background: var(--emerald); color: #fff; }
-.b-cat     { background: var(--bg); color: var(--muted); border: 1.5px solid var(--border); }
-.b-today   { background: var(--today-c); color: #fff; }
-
-.task-title {
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
-  margin-bottom: 6px;
-  color: var(--text);
-}
-.task-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 11px;
-  color: var(--muted);
   align-items: center;
-}
-.task-meta-item { display: flex; align-items: center; gap: 4px; }
-.meta-icon {
-  width: 14px; height: 14px;
-  flex-shrink: 0;
-  opacity: .6;
-}
-.task-deadline         { font-weight: 700; }
-.task-deadline.overdue { color: var(--overdue); }
-.task-deadline.urgent  { color: var(--urgent); }
-.task-deadline.soon    { color: var(--amber); }
-.task-deadline.normal  { color: var(--indigo); }
-
-.task-head-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.icon-btn-row { display: flex; gap: 5px; }
-.icon-btn {
-  width: 30px; height: 30px;
-  border: 1.5px solid var(--border);
+  gap: 12px;
+  padding: 9px 6px;
   border-radius: var(--radius-sm);
-  background: var(--bg);
+  transition: background .12s;
+  border-bottom: 1px solid var(--border-lt);
+}
+.todo-item:last-child { border-bottom: none; }
+.todo-item:hover { background: var(--bg); }
+.todo-item.done { opacity: .5; }
+
+.todo-check {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--muted-lt);
+  background: transparent;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: all .15s;
-  flex-shrink: 0;
-  padding: 0;
-  color: var(--muted);
+  transition: border-color .15s, background .15s;
+  padding: 0; color: transparent;
 }
-.icon-btn:hover { background: var(--indigo-lt); border-color: var(--indigo-bd); color: var(--indigo); }
-.icon-btn.is-today  { background: var(--today-bg); border-color: var(--today-bd); color: var(--today-c); }
-.icon-btn.has-memo  { background: var(--indigo-lt); border-color: var(--indigo-bd); color: var(--indigo); }
+.todo-check:hover { border-color: var(--indigo); }
+.todo-item.done .todo-check { border-color: var(--emerald); background: var(--emerald); color: #fff; }
 
-.chevron {
-  font-size: 10px;
-  color: var(--muted-lt);
-  transition: transform .2s;
-  line-height: 1;
+.todo-name {
+  flex: 1; font-size: 14px; font-weight: 500; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.task-card.open .chevron { transform: rotate(180deg); }
+.todo-item.done .todo-name { text-decoration: line-through; color: var(--muted); }
 
-.task-body {
+.todo-dl {
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  white-space: nowrap; flex-shrink: 0;
+}
+.todo-dl.overdue { color: var(--overdue); }
+.todo-dl.soon    { color: var(--amber); }
+.todo-dl.urgent  { color: var(--urgent); }
+
+/* ============================================================
+   タスク一覧 — シンプルリスト
+   ============================================================ */
+.task-simple-list {
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+.task-simple-item { border-bottom: 1px solid var(--border-lt); }
+.task-simple-item:last-child { border-bottom: none; }
+
+.task-simple-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; cursor: default;
+}
+.task-simple-item:hover .task-simple-row { background: var(--bg); }
+.task-simple-item.done .task-simple-row { opacity: .55; }
+
+.task-s-check {
+  width: 20px; height: 20px; flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--muted-lt);
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, background .15s;
+  padding: 0; color: transparent;
+}
+.task-s-check:hover { border-color: var(--indigo); }
+.task-simple-item.done .task-s-check { border-color: var(--emerald); background: var(--emerald); color: #fff; }
+
+.task-s-main { flex: 1; min-width: 0; }
+.task-s-title {
+  font-size: 13.5px; font-weight: 600; color: var(--text);
+  display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.4;
+}
+.task-simple-item.done .task-s-title { text-decoration: line-through; color: var(--muted); }
+.task-s-sub {
+  font-size: 11px; color: var(--muted); display: block; margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.task-s-date {
+  font-size: 11px; color: var(--muted); white-space: nowrap; flex-shrink: 0; font-weight: 600;
+}
+.task-s-date.overdue { color: var(--overdue); }
+.task-s-date.soon    { color: var(--amber); }
+.task-s-date.urgent  { color: var(--urgent); }
+
+.task-s-cat {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 99px; background: var(--indigo-lt); color: var(--indigo);
+  border: 1px solid var(--indigo-bd); white-space: nowrap; flex-shrink: 0;
+}
+
+.task-s-actions { display: flex; gap: 2px; flex-shrink: 0; }
+.task-s-btn {
+  width: 28px; height: 28px; border: none; background: transparent;
+  border-radius: 6px; cursor: pointer; color: var(--muted-lt);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .12s, color .12s; padding: 0;
+}
+.task-s-btn:hover { background: var(--indigo-lt); color: var(--indigo); }
+.task-s-btn.active { background: var(--indigo-lt); color: var(--indigo); }
+
+.task-s-body {
   display: none;
-  padding: 0 16px 14px;
+  padding: 0 14px 14px 50px;
   border-top: 1px solid var(--border-lt);
-}
-.task-card.open .task-body { display: block; }
-.task-notes {
-  font-size: 12.5px;
-  line-height: 1.8;
-  color: var(--text-sub);
   background: var(--bg);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  margin-top: 12px;
-  white-space: pre-wrap;
-  border: 1px solid var(--border-lt);
 }
-.task-source-label {
-  font-size: 10.5px;
-  color: var(--muted-lt);
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px dashed var(--border);
+.task-simple-item.open .task-s-body { display: block; }
+.task-s-expand svg { transition: transform .2s; }
+.task-simple-item.open .task-s-expand svg { transform: rotate(180deg); }
+
+.task-s-notes {
+  font-size: 12px; line-height: 1.75; color: var(--text-sub);
+  white-space: pre-wrap; background: var(--surface);
+  border-radius: 6px; padding: 10px 12px;
+  border: 1px solid var(--border); margin: 10px 0 8px;
+}
+.task-s-source {
+  font-size: 10.5px; color: var(--muted-lt);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 6px;
+  padding-top: 8px; border-top: 1px dashed var(--border);
 }
 
-/* Memo */
-.memo-area {
-  margin-top: 12px;
-  padding: 12px 14px;
-  background: #fffdf0;
-  border: 1.5px solid var(--amber-bd);
-  border-radius: var(--radius-sm);
+/* 完了済みセクション */
+.done-section-btn {
+  width: 100%; display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border: none; background: none;
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  cursor: pointer; font-family: inherit; text-align: left;
+  border-top: 1px solid var(--border); transition: color .15s;
 }
-.memo-area-title {
-  font-size: 10.5px;
-  font-weight: 800;
-  color: #92400e;
-  margin-bottom: 8px;
-  letter-spacing: .04em;
-  text-transform: uppercase;
+.done-section-btn:hover { color: var(--text); }
+.done-section-btn svg { transition: transform .2s; flex-shrink: 0; }
+.done-section-btn.open svg { transform: rotate(180deg); }
+.done-section-count {
+  background: var(--done-bg); color: var(--emerald);
+  border: 1px solid var(--done-bd); border-radius: 99px;
+  font-size: 10px; font-weight: 800; padding: 1px 8px;
 }
-.memo-textarea {
-  width: 100%; min-height: 72px;
-  border: 1.5px solid var(--amber-bd);
-  border-radius: 6px;
-  padding: 8px 10px;
-  font-size: 12.5px;
-  font-family: inherit;
-  resize: vertical;
-  background: #fff;
-  color: var(--text);
-  line-height: 1.6;
-}
-.memo-textarea:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px rgba(217,119,6,.12); }
-.memo-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
-.memo-hint   { font-size: 10px; color: var(--muted-lt); }
-.memo-save-btn {
-  border: none; border-radius: 6px;
-  padding: 5px 14px;
-  font-size: 11px; font-weight: 700;
-  cursor: pointer;
-  background: var(--amber); color: #fff;
-  font-family: inherit;
-  transition: opacity .15s;
-  letter-spacing: .02em;
-}
-.memo-save-btn:hover { opacity: .85; }
 
-/* Buttons */
-.btn {
-  border: none;
-  border-radius: 6px;
-  padding: 5px 12px;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: inherit;
-  transition: opacity .15s, transform .1s;
-  white-space: nowrap;
-  letter-spacing: .02em;
+/* ── タスク追加ボタン ── */
+.add-task-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; font-size: 11.5px; font-weight: 700;
+  border-radius: 6px; border: 1.5px solid var(--indigo-bd);
+  background: var(--indigo-lt); color: var(--indigo);
+  cursor: pointer; font-family: inherit; transition: all .15s;
 }
-.btn:hover  { opacity: .87; }
-.btn:active { transform: scale(.97); }
-.btn-done { background: var(--emerald); color: #fff; }
-.btn-undo { background: #9ca3af;       color: #fff; }
+.add-task-btn:hover { background: var(--indigo); color: #fff; border-color: var(--indigo); }
+
+/* 手動タスク削除 */
+.task-delete-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 2px 8px; font-size: 10.5px; font-weight: 600;
+  border-radius: 5px; border: 1px solid #fca5a5;
+  background: #fef2f2; color: #dc2626;
+  cursor: pointer; font-family: inherit; transition: all .12s;
+}
+.task-delete-btn:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
 
 /* ============================================================
    Notice Section
@@ -795,7 +772,7 @@ body {
   white-space: nowrap;
   font-weight: 600;
 }
-.today-task-list { display: flex; flex-direction: column; gap: 10px; }
+.today-task-list { }
 
 /* ============================================================
    タスク一覧 折りたたみセクション
@@ -912,9 +889,121 @@ body {
 }
 .done-toggle-chevron.open { transform: rotate(180deg); }
 
+/* ============================================================
+   モバイル対応
+   ============================================================ */
 @media (max-width: 700px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { position: static; height: auto; top: auto; }
+  /* ── Header ── */
+  .header { padding: 0 14px; height: 50px; }
+  .header-logo-mark { width: 26px; height: 26px; font-size: 12px; }
+  .header-title { font-size: 14px; }
+  .header-updated { display: none; }
+
+  /* ── Quickbar ── */
+  .quickbar { padding: 0 10px; height: 44px; }
+  .qlink { min-width: 44px; padding: 3px 7px; }
+  .q-badge { width: 22px; height: 22px; font-size: 10px; border-radius: 6px; }
+  .q-label { font-size: 8px; }
+  .qbar-group-label { font-size: 8px; padding: 0 2px 0 5px; }
+
+  /* ── Subheader ── */
+  .subheader { padding: 7px 14px; gap: 6px; }
+  .alert-pill { font-size: 11px; padding: 4px 12px; }
+  .stat-chips { margin-left: 0; gap: 5px; }
+  .stat-chip { font-size: 10px; padding: 3px 9px; gap: 4px; }
+  .stat-chip .num { font-size: 13px; }
+
+  /* ── Layout: メインを上、サイドバーを下に ── */
+  .layout {
+    display: flex;
+    flex-direction: column;
+  }
+  .main-col {
+    order: 1;
+    padding: 16px 14px 28px;
+  }
+  .sidebar {
+    order: 2;
+    position: static;
+    height: auto;
+    top: auto;
+    border-right: none;
+    border-top: 2px solid var(--border);
+    padding: 16px 14px;
+  }
+
+  /* ── 今日やること ── */
+  .today-progress-bar { padding: 10px 14px; gap: 12px; }
+  .today-progress-count { font-size: 20px; min-width: 40px; }
+  .today-progress-label { font-size: 9px; }
+  .today-progress-done-label { font-size: 10px; }
+
+  .todo-item { padding: 9px 4px; gap: 10px; }
+  .todo-name { font-size: 13px; }
+  .todo-dl { font-size: 10px; }
+
+  .todo-event-item { padding: 8px 4px; gap: 8px; }
+  .todo-event-name { font-size: 13px; }
+
+  /* ── イベントセクション ── */
+  .events-section-wrap { margin-top: 14px; }
+  .event-item { padding: 9px 4px; gap: 8px; }
+  .event-title { font-size: 13px; }
+  .event-sub { font-size: 10.5px; gap: 6px; }
+  .event-day-badge { font-size: 9.5px; padding: 2px 6px; }
+
+  /* ── タスク一覧 ── */
+  .tasks-section-wrap { margin-top: 14px; }
+  .tasks-collapse-header { padding: 10px 12px; font-size: 12.5px; }
+  .tasks-collapse-body { padding: 12px; }
+  .task-simple-row { padding: 10px 10px; gap: 8px; }
+  .task-s-title { font-size: 13px; }
+  .task-s-sub { font-size: 10.5px; }
+  .task-s-date { font-size: 10.5px; }
+  .task-s-cat { display: none; }   /* カテゴリバッジは省略 */
+  .task-s-notes { font-size: 11.5px; padding: 9px 10px; }
+  .task-s-body { padding: 0 10px 12px 42px; }
+
+  /* ── お知らせ ── */
+  .notice-section { padding: 10px 14px 32px; }
+  .notice-title { font-size: 13px; }
+  .notice-meta { font-size: 10.5px; }
+  .notice-content { font-size: 12px; padding: 9px 12px; }
+
+  /* ── サイドバー内カレンダー ── */
+  .cal-month-label { font-size: 13px; }
+  .cal-cell { font-size: 11px; }
+  .cal-btn { width: 26px; height: 26px; font-size: 10px; }
+  .cal-legend { gap: 5px; margin-top: 10px; padding-top: 10px; }
+  .legend-item { font-size: 10px; }
+
+  /* ── サイドバーリンク ── */
+  .sidebar-links { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .sidebar-link-btn { width: calc(50% - 4px); font-size: 12px; padding: 9px 10px; }
+  .today-count-badge { font-size: 10px; padding: 1px 6px; right: 8px; }
+
+  /* ── モーダル ── */
+  .modal-overlay { padding: 10px; }
+  .modal-card {
+    width: 100%;
+    max-width: none;
+    padding: 20px 16px;
+    max-height: calc(100vh - 40px);
+    border-radius: 12px;
+  }
+  .modal-title { font-size: 14px; }
+  .form-row-inline { flex-direction: column; gap: 0; }
+  .form-row-inline .form-row { flex: none; margin-bottom: 14px; }
+  .form-input, .form-select, .form-textarea { font-size: 16px; } /* iOS zoom 防止 */
+  .modal-footer { gap: 6px; }
+  .modal-cancel-btn, .modal-submit-btn { padding: 9px 16px; font-size: 13px; }
+}
+
+@media (max-width: 400px) {
+  .header-title { font-size: 13px; }
+  .stat-chips { display: none; }
+  .today-progress-bar { gap: 8px; }
+  .today-progress-count { font-size: 18px; min-width: 36px; }
 }
 
 /* ── タスク追加ボタン ── */
@@ -1014,6 +1103,102 @@ body {
   cursor: pointer; font-family: inherit; transition: all .12s;
 }
 .task-delete-btn:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+
+/* ============================================================
+   イベント
+   ============================================================ */
+.cal-dot.d-event { background: var(--cyan); }
+
+/* イベントセクション折りたたみ（シアン系カラー） */
+.events-section-wrap { margin-top: 16px; }
+.tasks-collapse-header.ev-theme:hover {
+  background: var(--cyan-lt); border-color: #a5f3fc; color: var(--cyan);
+}
+.tasks-collapse-header.ev-theme.open {
+  background: var(--cyan-lt); border-color: #a5f3fc; color: var(--cyan);
+}
+.tasks-collapse-body.ev-theme.open {
+  border-color: #a5f3fc;
+}
+.tc-badge.ev { background: var(--cyan); color: #fff; }
+
+/* イベントリスト */
+.event-list { list-style: none; display: flex; flex-direction: column; }
+.event-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 8px; border-bottom: 1px solid var(--border-lt);
+  border-radius: var(--radius-sm); transition: background .12s; cursor: default;
+}
+.event-item:last-child { border-bottom: none; }
+.event-item:hover { background: var(--cyan-lt); }
+.event-item.past { opacity: .5; }
+
+.event-icon-col {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border-radius: 6px; background: var(--cyan);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; margin-top: 1px;
+}
+.event-main { flex: 1; min-width: 0; }
+.event-title { font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.event-item.past .event-title { text-decoration: line-through; color: var(--muted); }
+.event-sub {
+  font-size: 11px; color: var(--muted); margin-top: 2px;
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+}
+.event-sub-time { font-weight: 700; color: var(--cyan); }
+.event-sub-loc  { color: var(--cyan); font-weight: 600; }
+
+.event-day-badge {
+  font-size: 10px; font-weight: 800; color: #fff;
+  background: var(--cyan); border-radius: 4px;
+  padding: 2px 8px; white-space: nowrap; flex-shrink: 0; align-self: flex-start;
+  letter-spacing: .03em;
+}
+.event-day-badge.is-today { background: var(--today-c); }
+.event-day-badge.is-past  { background: var(--muted-lt); }
+.event-day-badge.is-soon  { background: var(--indigo); }
+
+.event-actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+/* 今日やることセクション内のイベント行 */
+.todo-event-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 9px 6px; border-radius: var(--radius-sm);
+  border-bottom: 1px solid #cffafe;
+  background: var(--cyan-lt);
+  transition: background .12s;
+}
+.todo-event-item:last-child { border-bottom: none; }
+.todo-event-icon {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border-radius: 6px; background: var(--cyan);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+}
+.todo-event-time {
+  font-size: 12px; font-weight: 700; color: var(--cyan);
+  white-space: nowrap; flex-shrink: 0; min-width: 46px;
+}
+.todo-event-name {
+  flex: 1; font-size: 14px; font-weight: 500; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.todo-event-loc {
+  font-size: 11px; font-weight: 600; color: var(--cyan);
+  white-space: nowrap; flex-shrink: 0;
+}
+.today-events-label {
+  font-size: 9.5px; font-weight: 800; color: var(--cyan);
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 6px 6px 4px; opacity: .7;
+}
+.today-tasks-label {
+  font-size: 9.5px; font-weight: 800; color: var(--muted);
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 8px 6px 4px; border-top: 1px solid var(--border-lt);
+  opacity: .7; margin-top: 2px;
+}
 </style>
 </head>
 <body>
@@ -1096,7 +1281,7 @@ body {
       <button class="cal-btn" id="calNext">&#9654;</button>
     </div>
     <div class="cal-weekdays">
-      <span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span><span>日</span>
+      <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
     </div>
     <div class="cal-grid" id="calGrid"></div>
     <div class="cal-legend">
@@ -1105,6 +1290,7 @@ body {
       <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>期限迫る（7日以内）</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--indigo)"></div>通常</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--emerald)"></div>完了</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>イベント</div>
     </div>
 
     <div class="sidebar-links">
@@ -1142,6 +1328,27 @@ body {
     </div>
     <div class="today-task-list" id="todayTaskList"></div>
 
+    <!-- ── イベント（プルダウン） ── -->
+    <div class="events-section-wrap">
+      <button class="tasks-collapse-header ev-theme" id="eventsCollapseHeader" onclick="toggleEventsSection()">
+        <div class="tasks-collapse-header-left">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          イベント
+          <span class="tasks-collapse-count" id="eventsCollapseCount"></span>
+        </div>
+        <button class="add-task-btn" onclick="event.stopPropagation();openAddEventModal()" style="margin-left:0;border-color:#a5f3fc;background:var(--cyan-lt);color:var(--cyan);">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          追加
+        </button>
+        <span class="tasks-collapse-chevron" id="eventsCollapseChevron">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </button>
+      <div class="tasks-collapse-body ev-theme" id="eventsCollapseBody">
+        <div id="eventList"></div>
+      </div>
+    </div>
+
     <!-- ── タスク一覧（プルダウン） ── -->
     <div class="tasks-section-wrap">
       <button class="tasks-collapse-header" id="tasksCollapseHeader" onclick="toggleTasksSection()">
@@ -1159,15 +1366,7 @@ body {
         </span>
       </button>
       <div class="tasks-collapse-body" id="tasksCollapseBody">
-        <div class="task-list" id="taskList"></div>
-        <div id="doneToggleWrap" style="display:none; margin-top:16px;">
-          <button id="doneToggleBtn" onclick="toggleDoneVisible()" class="done-toggle-btn">
-            <span id="doneToggleLabel">完了済みを表示</span>
-            <span id="doneToggleCount" class="done-toggle-count"></span>
-            <span id="doneToggleChevron" class="done-toggle-chevron">${IC_CHEVRON}</span>
-          </button>
-          <div id="doneList" class="task-list" style="display:none; margin-top:8px;"></div>
-        </div>
+        <div id="taskList"></div>
       </div>
     </div>
 
@@ -1181,20 +1380,22 @@ body {
 // ============================================================
 // SVG Icons
 // ============================================================
-const IC_STAR   = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
-const IC_PENCIL = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
-const IC_TRASH  = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>`;
+const IC_PENCIL  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+const IC_TRASH   = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>`;
 const IC_CHEVRON = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>`;
-const IC_FOLDER = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>`;
-const IC_CAL    = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+const IC_CHECK   = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const IC_STAR    = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+const IC_CAL     = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
 
 // ============================================================
 // localStorage
 // ============================================================
-const LS_STATE = 'workplace_report_states_v1';
-const LS_TODAY = 'workplace_today_v1';
-const LS_MEMO  = 'workplace_memos_v1';
+const LS_STATE          = 'workplace_report_states_v1';
+const LS_TODAY          = 'workplace_today_v1';
+const LS_MEMO           = 'workplace_memos_v1';
 const LS_HIDDEN_NOTICES = 'workplace_hidden_notices_v1';
+const LS_EDITS          = 'workplace_task_edits_v1';
+const LS_MANUAL_EVENTS  = 'workplace_manual_events_v1';
 
 function lsGet(key)       { try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; } }
 function lsSet(key, val)  { localStorage.setItem(key, JSON.stringify(val)); }
@@ -1202,9 +1403,13 @@ function lsSet(key, val)  { localStorage.setItem(key, JSON.stringify(val)); }
 function saveState(id, status)  { const s = lsGet(LS_STATE); s[id] = { status, at: new Date().toISOString() }; lsSet(LS_STATE, s); }
 function clearState(id)         { const s = lsGet(LS_STATE); delete s[id]; lsSet(LS_STATE, s); }
 function applyStoredStates()    { const s = lsGet(LS_STATE); APP_DATA.tasks.forEach(t => { if (s[t.id]) t.status = s[t.id].status; }); }
+function applyStoredEdits()     { const e = lsGet(LS_EDITS); APP_DATA.tasks.forEach(t => { if (e[t.id]) Object.assign(t, e[t.id]); }); }
+function saveEdit(id, fields)   { const e = lsGet(LS_EDITS); e[id] = Object.assign(e[id]||{}, fields); lsSet(LS_EDITS, e); }
 function isTodayTask(id)        { return !!lsGet(LS_TODAY)[id]; }
 function setTodayTask(id, val)  { const s = lsGet(LS_TODAY); if (val) s[id] = true; else delete s[id]; lsSet(LS_TODAY, s); }
-function todayCount()           { return Object.keys(lsGet(LS_TODAY)).filter(id => APP_DATA.tasks.find(t => t.id === id && t.status !== '完了')).length; }
+function isDeadlineToday(t)     { return dayDiff(t.deadline) === 0; }
+function isInTodaySection(t)    { return isTodayTask(t.id) || isDeadlineToday(t); }
+function todayCount()           { return APP_DATA.tasks.filter(t => taskState(t) !== 'done' && isInTodaySection(t)).length; }
 function getMemo(id)            { return lsGet(LS_MEMO)[id] || ''; }
 function setMemo(id, text)      { const s = lsGet(LS_MEMO); if (text) s[id] = text; else delete s[id]; lsSet(LS_MEMO, s); }
 function isNoticeHidden(id)     { return !!lsGet(LS_HIDDEN_NOTICES)[id]; }
@@ -1293,179 +1498,172 @@ function renderSubheader() {
 }
 
 // ============================================================
-// Task List
+// 日付表示ヘルパー
 // ============================================================
-let _doneVisible = false;
-function toggleDoneVisible() {
-  _doneVisible = !_doneVisible;
-  const doneList    = document.getElementById('doneList');
-  const label       = document.getElementById('doneToggleLabel');
-  const chevron     = document.getElementById('doneToggleChevron');
-  doneList.style.display = _doneVisible ? 'flex' : 'none';
-  label.textContent = _doneVisible ? '完了済みを隠す' : '完了済みを表示';
-  chevron.classList.toggle('open', _doneVisible);
+function fmtDateShort(t) {
+  if (t.urgent && !t.deadline) return null;
+  if (!t.deadline) return null;
+  const d = new Date(t.deadline);
+  const diff = dayDiff(t.deadline);
+  let s = `${d.getMonth()+1}/${d.getDate()}`;
+  if (diff < 0)      s += `（${Math.abs(diff)}日超過）`;
+  else if (diff ===0) s += '（本日）';
+  else if (diff <= 7) s += `（残${diff}日）`;
+  return s;
+}
+function dateClass(state) {
+  return {overdue:'overdue', urgent:'urgent', soon:'soon', normal:'', done:''}[state] || '';
 }
 
-function buildTaskCard(t) {
-    const state   = taskState(t);
-    const isToday = isTodayTask(t.id);
-    const memo    = getMemo(t.id);
-    const hasMemo = memo.length > 0;
+// ============================================================
+// 今日やること — チェックリスト アイテム
+// ============================================================
+function buildTodayItem(t) {
+  const state  = taskState(t);
+  const isDone = state === 'done';
+  const dl     = fmtDateShort(t);
+  const dlCls  = t.urgent && !t.deadline ? 'urgent' : dateClass(state);
+  const li = document.createElement('li');
+  li.className = `todo-item${isDone ? ' done' : ''}`;
+  li.id = `todo-${t.id}`;
+  li.innerHTML = `
+    <button class="todo-check" onclick="toggleDoneItem('${t.id}')" title="${isDone?'未対応に戻す':'完了にする'}">${isDone ? IC_CHECK : ''}</button>
+    <span class="todo-name">${t.title}</span>
+    ${t.urgent && !t.deadline
+      ? `<span class="todo-dl urgent">⚡緊急</span>`
+      : dl ? `<span class="todo-dl ${dlCls}">${dl}</span>` : ''}
+  `;
+  return li;
+}
 
-    const card = document.createElement('div');
-    card.className = `task-card s-${state}`;
-    card.id = `card-${t.id}`;
-    card.innerHTML = `
-      <div class="task-head" onclick="toggleCard('${t.id}')">
-        <div class="task-head-left">
-          <div class="task-badges">
-            ${stateBadgeHTML(state)}
-            <span class="badge b-cat">${t.category}</span>
-            ${isToday ? '<span class="badge b-today">TODAY</span>' : ''}
-          </div>
-          <div class="task-title">${t.title}</div>
-          <div class="task-meta">
-            <span class="task-meta-item">${IC_FOLDER} ${t.source}</span>
-            <span class="task-meta-item task-deadline ${dlClass(state)}">${IC_CAL} ${fmtDeadline(t)}</span>
-          </div>
-        </div>
-        <div class="task-head-right">
-          <div class="icon-btn-row">
-            <button class="icon-btn ${isToday?'is-today':''}" id="todaybtn-${t.id}"
-              onclick="event.stopPropagation();toggleToday('${t.id}')"
-              title="${isToday?'今日やることから外す':'今日やることに追加'}">${IC_STAR}</button>
-            <button class="icon-btn ${hasMemo?'has-memo':''}" id="memobtn-${t.id}"
-              onclick="event.stopPropagation();toggleMemoArea('${t.id}')"
-              title="メモ">${IC_PENCIL}</button>
-          </div>
-          ${state!=='done'
-            ? `<button class="btn btn-done" onclick="event.stopPropagation();markDone('${t.id}')">完了</button>`
-            : `<button class="btn btn-undo" onclick="event.stopPropagation();markUndone('${t.id}')">戻す</button>`
-          }
-          <span class="chevron">${IC_CHEVRON}</span>
-        </div>
+function toggleDoneItem(id) {
+  const t = APP_DATA.tasks.find(x => x.id === id);
+  if (!t) return;
+  if (taskState(t) === 'done') { t.status = '未対応'; clearState(id); }
+  else                         { t.status = '完了';   saveState(id, '完了'); }
+  renderAll();
+}
+
+// ============================================================
+// タスク一覧 — シンプルリスト アイテム
+// ============================================================
+function buildTaskItem(t) {
+  const state  = taskState(t);
+  const isDone = state === 'done';
+  const dl     = fmtDateShort(t);
+  const dlCls  = t.urgent && !t.deadline ? 'urgent' : dateClass(state);
+  const isPin  = isTodayTask(t.id);
+  const memo   = getMemo(t.id);
+
+  const li = document.createElement('li');
+  li.className = `task-simple-item${isDone ? ' done' : ''}`;
+  li.id = `titem-${t.id}`;
+  li.innerHTML = `
+    <div class="task-simple-row">
+      <button class="task-s-check" onclick="toggleDoneItem('${t.id}')" title="${isDone?'未対応に戻す':'完了にする'}">${isDone ? IC_CHECK : ''}</button>
+      <div class="task-s-main">
+        <span class="task-s-title">${t.title}</span>
+        <span class="task-s-sub">${t.source}</span>
       </div>
-      <div class="task-body" id="body-${t.id}">
-        <div class="task-notes">${t.notes}</div>
-        <div class="memo-area" id="memo-area-${t.id}" style="display:${hasMemo?'block':'none'}">
-          <div class="memo-area-title">Memo</div>
-          <textarea class="memo-textarea" id="memo-text-${t.id}"
-            placeholder="メモを入力... (Ctrl+Enter で保存)"
-            onkeydown="if(event.ctrlKey&&event.key==='Enter'){event.preventDefault();saveMemo('${t.id}')}"
-          >${memo}</textarea>
-          <div class="memo-footer">
-            <span class="memo-hint">Ctrl + Enter で保存</span>
-            <button class="memo-save-btn" onclick="saveMemo('${t.id}')">保存</button>
-          </div>
-        </div>
-        <div class="task-source-label" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
-          <span>${t.sourceFile ? t.sourceFile + '　／　' : ''}登録日：${t.addedDate}</span>
-          ${t._manual ? `<button class="task-delete-btn" onclick="event.stopPropagation();deleteManualTask('${t.id}')">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-            削除
-          </button>` : ''}
-        </div>
+      ${t.urgent && !t.deadline
+        ? `<span class="task-s-date urgent">⚡緊急</span>`
+        : dl ? `<span class="task-s-date ${dlCls}">${dl}</span>` : ''}
+      <span class="task-s-cat">${t.category}</span>
+      <div class="task-s-actions">
+        <button class="task-s-btn${isPin?' active':''}" onclick="togglePinItem('${t.id}')" title="${isPin?'今日やることから外す':'今日やることに追加'}">${IC_STAR}</button>
+        <button class="task-s-btn" onclick="openEditModal('${t.id}')" title="編集">${IC_PENCIL}</button>
+        <button class="task-s-btn task-s-expand" onclick="toggleTaskItem('${t.id}')" title="詳細">${IC_CHEVRON}</button>
       </div>
-    `;
-    return card;
+    </div>
+    <div class="task-s-body" id="tbody-${t.id}">
+      ${t.notes ? `<div class="task-s-notes">${t.notes}</div>` : ''}
+      ${memo ? `<div class="task-s-notes" style="background:#fffdf0;border-color:#fde68a;margin-top:6px;"><strong style="font-size:10px;color:#92400e;">MEMO</strong><br>${memo}</div>` : ''}
+      <div class="task-s-source">
+        <span>${t.sourceFile ? `📂 ${t.sourceFile}　` : ''}登録日：${t.addedDate}</span>
+        ${t._manual ? `<button class="task-delete-btn" onclick="deleteManualTask('${t.id}')">削除</button>` : ''}
+      </div>
+    </div>
+  `;
+  return li;
 }
 
-function renderTasks() {
-  const ORDER = {overdue:0,urgent:1,soon:2,normal:3};
-  const active = APP_DATA.tasks.filter(t => taskState(t) !== 'done').sort((a,b) => {
-    const sa = taskState(a), sb = taskState(b);
-    if (ORDER[sa]!==ORDER[sb]) return ORDER[sa]-ORDER[sb];
-    if (!a.deadline && !b.deadline) return 0;
-    if (!a.deadline) return -1; if (!b.deadline) return 1;
-    return new Date(a.deadline) - new Date(b.deadline);
-  });
-  const done = APP_DATA.tasks.filter(t => taskState(t) === 'done');
-
-  const list = document.getElementById('taskList');
-  list.innerHTML = '';
-  if (active.length===0) { list.innerHTML='<div class="empty-state">未対応のタスクはありません</div>'; }
-
-  active.forEach(t => {
-    list.appendChild(buildTaskCard(t));
-  });
-
-  // 完了済みセクション
-  const wrap = document.getElementById('doneToggleWrap');
-  const doneList = document.getElementById('doneList');
-  if (done.length > 0) {
-    wrap.style.display = 'block';
-    document.getElementById('doneToggleCount').textContent = done.length;
-    doneList.innerHTML = '';
-    done.forEach(t => doneList.appendChild(buildTaskCard(t)));
-  } else {
-    wrap.style.display = 'none';
-  }
-}
-
-
-function toggleCard(id) {
-  const card = document.getElementById(`card-${id}`);
-  card.classList.toggle('open');
-  const isOpen = card.classList.contains('open');
+function toggleTaskItem(id) {
+  const li = document.getElementById(`titem-${id}`);
+  if (!li) return;
+  li.classList.toggle('open');
   document.querySelectorAll('.cal-dot.pulsing').forEach(d => d.classList.remove('pulsing'));
   document.querySelectorAll('.cal-cell.highlighted').forEach(c => c.classList.remove('highlighted'));
-  if (isOpen) {
+  if (li.classList.contains('open')) {
     const t = APP_DATA.tasks.find(x => x.id === id);
     if (t && t.deadline) {
-      const dateKey = t.deadline.substring(0, 10);
-      const cell = document.querySelector(`.cal-cell[data-date="${dateKey}"]`);
-      if (cell) {
-        cell.classList.add('highlighted');
-        cell.querySelectorAll('.cal-dot').forEach(d => d.classList.add('pulsing'));
-      }
+      const cell = document.querySelector(`.cal-cell[data-date="${t.deadline.substring(0,10)}"]`);
+      if (cell) { cell.classList.add('highlighted'); cell.querySelectorAll('.cal-dot').forEach(d => d.classList.add('pulsing')); }
     }
   }
 }
 
-function markDone(id) {
-  const t = APP_DATA.tasks.find(x=>x.id===id);
-  if (!t) return;
-  t.status = '完了';
-  saveState(id, '完了');
-  renderAll();
-}
-function markUndone(id) {
-  const t = APP_DATA.tasks.find(x=>x.id===id);
-  if (!t) return;
-  t.status = '未対応';
-  clearState(id);
+function togglePinItem(id) {
+  setTodayTask(id, !isTodayTask(id));
   renderAll();
 }
 
-function toggleToday(id) {
-  const next = !isTodayTask(id);
-  setTodayTask(id, next);
-  const btn = document.getElementById(`todaybtn-${id}`);
-  if (btn) {
-    btn.classList.toggle('is-today', next);
-    btn.title = next ? '今日やることから外す' : '今日やることに追加';
+function markDone(id)   { const t=APP_DATA.tasks.find(x=>x.id===id); if(!t) return; t.status='完了';  saveState(id,'完了');  renderAll(); }
+function markUndone(id) { const t=APP_DATA.tasks.find(x=>x.id===id); if(!t) return; t.status='未対応'; clearState(id);       renderAll(); }
+
+function renderTasks() {
+  const ORDER = {overdue:0, urgent:1, soon:2, normal:3};
+  const allTasks = APP_DATA.tasks;
+  const active = allTasks.filter(t => taskState(t) !== 'done').sort((a,b) => {
+    const sa = taskState(a), sb = taskState(b);
+    if (ORDER[sa] !== ORDER[sb]) return ORDER[sa] - ORDER[sb];
+    if (!a.deadline && !b.deadline) return 0;
+    if (!a.deadline) return -1; if (!b.deadline) return 1;
+    return new Date(a.deadline) - new Date(b.deadline);
+  });
+  const done = allTasks.filter(t => taskState(t) === 'done');
+
+  const wrap = document.getElementById('taskList');
+  wrap.innerHTML = '';
+
+  if (active.length === 0 && done.length === 0) {
+    wrap.innerHTML = '<div class="empty-state">タスクはありません</div>';
+    return;
   }
-  renderAll();
+
+  const ul = document.createElement('ul');
+  ul.className = 'task-simple-list';
+  if (active.length === 0) {
+    ul.innerHTML = '<li style="padding:16px;text-align:center;color:var(--muted);font-size:13px;">未対応のタスクはありません</li>';
+  } else {
+    active.forEach(t => ul.appendChild(buildTaskItem(t)));
+  }
+
+  // 完了済みトグル
+  if (done.length > 0) {
+    const doneBtn = document.createElement('button');
+    doneBtn.className = 'done-section-btn';
+    doneBtn.id = 'doneSectionBtn';
+    doneBtn.innerHTML = `${IC_CHEVRON}<span>完了済み</span><span class="done-section-count">${done.length}</span>`;
+    doneBtn.onclick = () => {
+      const isOpen = doneBtn.classList.toggle('open');
+      doneUl.style.display = isOpen ? 'block' : 'none';
+    };
+    ul.appendChild(doneBtn);
+    const doneUl = document.createElement('ul');
+    doneUl.className = 'task-simple-list';
+    doneUl.style.cssText = 'display:none;border:none;border-radius:0;border-top:1px solid var(--border-lt);';
+    done.forEach(t => doneUl.appendChild(buildTaskItem(t)));
+    ul.appendChild(doneUl);
+  }
+
+  wrap.appendChild(ul);
 }
 
-function toggleMemoArea(id) {
-  const area = document.getElementById(`memo-area-${id}`);
-  if (!area) return;
-  const card = document.getElementById(`card-${id}`);
-  if (!card.classList.contains('open')) card.classList.add('open');
-  const isOpen = area.style.display !== 'none';
-  area.style.display = isOpen ? 'none' : 'block';
-  if (!isOpen) document.getElementById(`memo-text-${id}`)?.focus();
-}
 function saveMemo(id) {
   const ta = document.getElementById(`memo-text-${id}`);
   if (!ta) return;
-  const text = ta.value.trim();
-  setMemo(id, text);
-  const btn = document.getElementById(`memobtn-${id}`);
-  if (btn) btn.classList.toggle('has-memo', text.length > 0);
-  const saveBtn = ta.closest('.memo-area')?.querySelector('.memo-save-btn');
-  if (saveBtn) { saveBtn.textContent = '保存済'; setTimeout(()=>{ saveBtn.textContent='保存'; },1500); }
+  setMemo(id, ta.value.trim());
+  renderAll();
 }
 
 // ============================================================
@@ -1477,13 +1675,18 @@ document.getElementById('calNext').onclick = () => { calMonth++; if(calMonth>11)
 
 function dotsForDate(y,m,d) {
   const key = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-  return APP_DATA.tasks.filter(t=>t.deadline&&t.deadline.substring(0,10)===key).map(t=>{
+  const taskDots = APP_DATA.tasks.filter(t=>t.deadline&&t.deadline.substring(0,10)===key).map(t=>{
     const s=taskState(t);
     return s==='done'?'d-done':s==='overdue'?'d-overdue':s==='urgent'?'d-urgent':s==='soon'?'d-soon':'d-normal';
   });
+  const evDots = (APP_DATA.events||[]).filter(ev=>ev.date&&ev.date.substring(0,10)===key).map(()=>'d-event');
+  return [...taskDots, ...evDots];
 }
 function tasksForDate(dateKey) {
   return APP_DATA.tasks.filter(t=>t.deadline&&t.deadline.substring(0,10)===dateKey);
+}
+function eventsForDate(dateKey) {
+  return (APP_DATA.events||[]).filter(ev=>ev.date&&ev.date.substring(0,10)===dateKey);
 }
 function dotColorHex(state) {
   return {overdue:'#dc2626',urgent:'#ea580c',soon:'#d97706',normal:'#4f46e5',done:'#059669'}[state]||'#9ca3af';
@@ -1494,7 +1697,7 @@ function renderCalendar() {
   document.getElementById('calMonthLabel').textContent = `${calYear}年 ${MONTHS[calMonth]}`;
   const grid=document.getElementById('calGrid'); grid.innerHTML='';
   const first=new Date(calYear,calMonth,1), last=new Date(calYear,calMonth+1,0);
-  let offset=first.getDay(); offset=offset===0?6:offset-1;
+  let offset=first.getDay();
   for(let i=0;i<offset;i++){const d=new Date(calYear,calMonth,1-(offset-i));addCell(grid,d.getDate(),'other',[],null);}
   for(let d=1;d<=last.getDate();d++){
     const date=new Date(calYear,calMonth,d), dow=date.getDay();
@@ -1523,11 +1726,19 @@ function addCell(grid,num,cls,dots,dateKey){
 
 const _tt = document.getElementById('calTooltip');
 function showCalTooltip(e, dateKey) {
-  const tasks = tasksForDate(dateKey);
-  if (!tasks.length) return;
+  const tasks  = tasksForDate(dateKey);
+  const events = eventsForDate(dateKey);
+  if (!tasks.length && !events.length) return;
   const d = new Date(dateKey);
   const dow = ['日','月','火','水','木','金','土'][d.getDay()];
   let html = `<div class="tt-date">${d.getMonth()+1}/${d.getDate()}（${dow}）</div>`;
+  events.forEach(ev => {
+    const t = new Date(ev.date);
+    const timeStr = (t.getHours()||t.getMinutes())
+      ? ` ${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}${ev.endTime?'〜'+ev.endTime:''}`
+      : '';
+    html += `<div class="tt-item"><div class="tt-dot" style="background:#0891b2"></div><div class="tt-title">📅 ${ev.title}${timeStr}</div></div>`;
+  });
   tasks.forEach(t => {
     const s = taskState(t);
     const color = dotColorHex(s);
@@ -1592,11 +1803,85 @@ function renderNotices() {
 }
 
 // ============================================================
+// イベント ユーティリティ
+// ============================================================
+function eventDayDiff(ev) {
+  if (!ev.date) return null;
+  const d = new Date(ev.date); d.setHours(0,0,0,0);
+  return Math.ceil((d - TODAY) / 86400000);
+}
+function isEventToday(ev)  { return eventDayDiff(ev) === 0; }
+function isEventPast(ev)   { const diff = eventDayDiff(ev); return diff !== null && diff < 0; }
+function fmtEventTime(ev) {
+  const d = new Date(ev.date);
+  if (!d.getHours() && !d.getMinutes()) return '終日';
+  let s = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  if (ev.endTime) s += `〜${ev.endTime}`;
+  return s;
+}
+function fmtEventDateFull(ev) {
+  const d = new Date(ev.date);
+  const dow = ['日','月','火','水','木','金','土'][d.getDay()];
+  let s = `${d.getMonth()+1}/${d.getDate()}（${dow}）`;
+  const t = fmtEventTime(ev);
+  if (t !== '終日') s += ` ${t}`;
+  return s;
+}
+
+function buildTodayEventItem(ev) {
+  const timeStr = fmtEventTime(ev);
+  const li = document.createElement('li');
+  li.className = 'todo-event-item';
+  li.innerHTML = `
+    <div class="todo-event-icon">${IC_CAL}</div>
+    <span class="todo-event-time">${timeStr}</span>
+    <span class="todo-event-name">${ev.title}</span>
+    ${ev.location ? `<span class="todo-event-loc">📍${ev.location}</span>` : ''}
+  `;
+  return li;
+}
+
+function buildEventItem(ev) {
+  const diff   = eventDayDiff(ev);
+  const isPast = diff !== null && diff < 0;
+  const isToday = diff === 0;
+  let badgeCls = '', badgeLabel = '';
+  if (isToday)       { badgeCls = 'is-today'; badgeLabel = '本日'; }
+  else if (isPast)   { badgeCls = 'is-past';  badgeLabel = `${Math.abs(diff)}日前`; }
+  else if (diff <= 7){ badgeCls = 'is-soon';  badgeLabel = `${diff}日後`; }
+  else               { badgeLabel = `${diff}日後`; }
+
+  const fmtDate = fmtEventDateFull(ev);
+  const li = document.createElement('li');
+  li.className = `event-item${isPast ? ' past' : ''}`;
+  li.innerHTML = `
+    <div class="event-icon-col">${IC_CAL}</div>
+    <div class="event-main">
+      <div class="event-title">${ev.title}</div>
+      <div class="event-sub">
+        <span class="event-sub-time">${fmtDate}</span>
+        ${ev.location ? `<span class="event-sub-loc">📍${ev.location}</span>` : ''}
+        ${ev.source && ev.source !== '手動登録' ? `<span>${ev.source}</span>` : ''}
+      </div>
+      ${ev.notes ? `<div style="font-size:11px;color:var(--text-sub);margin-top:5px;line-height:1.65;white-space:pre-wrap;">${ev.notes}</div>` : ''}
+    </div>
+    ${badgeLabel ? `<span class="event-day-badge ${badgeCls}">${badgeLabel}</span>` : ''}
+    <div class="event-actions">
+      ${ev._manual ? `<button class="task-s-btn" onclick="deleteManualEvent('${ev.id}')" title="削除">${IC_TRASH}</button>` : ''}
+    </div>
+  `;
+  return li;
+}
+
+// ============================================================
 // Today Section (インライン)
 // ============================================================
 function renderTodaySection() {
-  const todayIds  = lsGet(LS_TODAY);
-  const todayTasks = APP_DATA.tasks.filter(t => todayIds[t.id]);
+  const todayTasks  = APP_DATA.tasks.filter(t => isInTodaySection(t));
+  const todayEvents = (APP_DATA.events || [])
+    .filter(ev => isEventToday(ev))
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
   const total = todayTasks.length;
   const done  = todayTasks.filter(t => taskState(t) === 'done').length;
   const pct   = total > 0 ? Math.round(done / total * 100) : 0;
@@ -1608,13 +1893,31 @@ function renderTodaySection() {
   if (fillEl)  fillEl.style.width  = pct + '%';
   if (doneEl)  doneEl.textContent  = `完了 ${done}件`;
 
-  const list = document.getElementById('todayTaskList');
-  if (!list) return;
-  list.innerHTML = '';
+  const container = document.getElementById('todayTaskList');
+  if (!container) return;
+  container.innerHTML = '';
 
-  if (todayTasks.length === 0) {
-    list.innerHTML = '<div class="empty-state">今日やることが登録されていません。<br>タスク一覧から ⭐ を押して追加してください。</div>';
+  if (todayTasks.length === 0 && todayEvents.length === 0) {
+    container.innerHTML = '<div class="empty-state" style="padding:20px 0;">今日やることが登録されていません。<br>タスク一覧から ⭐ を押して追加できます。</div>';
     return;
+  }
+
+  const ul = document.createElement('ul');
+  ul.className = 'todo-list';
+
+  // 本日のイベントを先頭に表示
+  if (todayEvents.length > 0) {
+    if (todayTasks.length > 0) {
+      const evLabel = document.createElement('li');
+      evLabel.innerHTML = '<div class="today-events-label">本日のイベント</div>';
+      ul.appendChild(evLabel);
+    }
+    todayEvents.forEach(ev => ul.appendChild(buildTodayEventItem(ev)));
+    if (todayTasks.length > 0) {
+      const taskLabel = document.createElement('li');
+      taskLabel.innerHTML = '<div class="today-tasks-label">タスク</div>';
+      ul.appendChild(taskLabel);
+    }
   }
 
   const sorted = [...todayTasks].sort((a, b) => {
@@ -1622,11 +1925,134 @@ function renderTodaySection() {
     const db = taskState(b) === 'done' ? 1 : 0;
     if (da !== db) return da - db;
     if (a.deadline && b.deadline) return new Date(a.deadline) - new Date(b.deadline);
-    if (a.deadline) return -1;
-    if (b.deadline) return 1;
+    if (a.deadline) return -1; if (b.deadline) return 1;
     return 0;
   });
-  sorted.forEach(t => list.appendChild(buildTaskCard(t)));
+  sorted.forEach(t => ul.appendChild(buildTodayItem(t)));
+  container.appendChild(ul);
+}
+
+// ============================================================
+// イベントセクション 描画・折りたたみ・手動CRUD
+// ============================================================
+let _eventsSectionOpen = false;
+function toggleEventsSection() {
+  _eventsSectionOpen = !_eventsSectionOpen;
+  document.getElementById('eventsCollapseHeader').classList.toggle('open', _eventsSectionOpen);
+  document.getElementById('eventsCollapseBody').classList.toggle('open', _eventsSectionOpen);
+  document.getElementById('eventsCollapseChevron').classList.toggle('open', _eventsSectionOpen);
+}
+
+function renderEventsSection() {
+  if (!APP_DATA.events) APP_DATA.events = [];
+  const all      = [...APP_DATA.events].sort((a,b) => new Date(a.date) - new Date(b.date));
+  const upcoming = all.filter(ev => !isEventPast(ev));
+  const past     = all.filter(ev => isEventPast(ev));
+
+  const countEl = document.getElementById('eventsCollapseCount');
+  if (countEl) {
+    const todayCnt = upcoming.filter(isEventToday).length;
+    let html = `<span>予定 ${upcoming.length}件</span>`;
+    if (todayCnt > 0) html += `<span class="tc-badge ev">${todayCnt} 本日</span>`;
+    countEl.innerHTML = html;
+  }
+
+  const wrap = document.getElementById('eventList');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  if (all.length === 0) {
+    wrap.innerHTML = '<div class="empty-state">イベントはありません</div>';
+    return;
+  }
+
+  if (upcoming.length > 0) {
+    const ul = document.createElement('ul');
+    ul.className = 'event-list';
+    upcoming.forEach(ev => ul.appendChild(buildEventItem(ev)));
+    wrap.appendChild(ul);
+  } else {
+    wrap.innerHTML += '<div class="empty-state" style="padding:12px 0;">予定されているイベントはありません</div>';
+  }
+
+  if (past.length > 0) {
+    const pastBtn = document.createElement('button');
+    pastBtn.className = 'done-section-btn';
+    pastBtn.style.cssText = 'margin-top:4px;';
+    pastBtn.innerHTML = `${IC_CHEVRON}<span>過去のイベント</span><span class="done-section-count" style="background:var(--bg);color:var(--muted-lt);border-color:var(--border);">${past.length}</span>`;
+    let pastUl = null;
+    pastBtn.onclick = () => {
+      const isOpen = pastBtn.classList.toggle('open');
+      if (!pastUl) {
+        pastUl = document.createElement('ul');
+        pastUl.className = 'event-list';
+        pastUl.style.cssText = 'border-top:1px solid var(--border-lt);';
+        [...past].reverse().forEach(ev => pastUl.appendChild(buildEventItem(ev)));
+        wrap.appendChild(pastUl);
+      }
+      pastUl.style.display = isOpen ? '' : 'none';
+    };
+    wrap.appendChild(pastBtn);
+  }
+}
+
+// 手動イベント CRUD
+function getManualEvents()        { try { return JSON.parse(localStorage.getItem(LS_MANUAL_EVENTS)||'[]'); } catch { return []; } }
+function saveManualEvents(evs)    { localStorage.setItem(LS_MANUAL_EVENTS, JSON.stringify(evs)); }
+function loadManualEvents() {
+  getManualEvents().forEach(ev => {
+    if (!APP_DATA.events.find(x => x.id === ev.id)) APP_DATA.events.push(ev);
+  });
+}
+function deleteManualEvent(id) {
+  if (!confirm('このイベントを削除しますか？')) return;
+  saveManualEvents(getManualEvents().filter(e => e.id !== id));
+  const idx = APP_DATA.events.findIndex(e => e.id === id);
+  if (idx !== -1) APP_DATA.events.splice(idx, 1);
+  renderAll();
+}
+
+// イベント追加モーダル
+function openAddEventModal() {
+  ['fev-title','fev-date','fev-end','fev-loc','fev-source','fev-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('addEventModal').classList.add('open');
+  setTimeout(() => document.getElementById('fev-title').focus(), 50);
+}
+function closeAddEventModal() {
+  document.getElementById('addEventModal').classList.remove('open');
+}
+function onEventModalClick(e) {
+  if (e.target === document.getElementById('addEventModal')) closeAddEventModal();
+}
+function submitAddEventForm() {
+  const title = document.getElementById('fev-title').value.trim();
+  if (!title) { document.getElementById('fev-title').focus(); return; }
+  const date = document.getElementById('fev-date').value;
+  if (!date)  { document.getElementById('fev-date').focus(); return; }
+
+  const id = 'ev_manual_' + Date.now();
+  const ev = {
+    id,
+    title,
+    date,
+    endTime:    document.getElementById('fev-end').value.trim() || null,
+    location:   document.getElementById('fev-loc').value.trim() || null,
+    source:     document.getElementById('fev-source').value.trim() || '手動登録',
+    notes:      document.getElementById('fev-notes').value.trim() || null,
+    sourceFile: null,
+    addedDate:  new Date().toISOString().substring(0, 10),
+    _manual:    true,
+  };
+
+  const evs = getManualEvents();
+  evs.push(ev);
+  saveManualEvents(evs);
+  APP_DATA.events.push(ev);
+  closeAddEventModal();
+  if (!_eventsSectionOpen) toggleEventsSection();
+  renderAll();
 }
 
 // ============================================================
@@ -1665,7 +2091,7 @@ function updateTasksCollapseCount() {
 // ============================================================
 function renderAll() {
   renderHeader(); renderSubheader(); renderTasks(); renderCalendar(); renderNotices();
-  renderTodaySection(); updateTasksCollapseCount();
+  renderTodaySection(); updateTasksCollapseCount(); renderEventsSection();
 }
 
 // ============================================================
@@ -1701,6 +2127,61 @@ function launchDashboard() {
       }
     }
   }, 1000);
+}
+
+// ============================================================
+// 編集モーダル
+// ============================================================
+let _editingId = null;
+
+function openEditModal(id) {
+  _editingId = id;
+  const t = APP_DATA.tasks.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('fe-title').value    = t.title || '';
+  document.getElementById('fe-category').value = t.category || '対応';
+  document.getElementById('fe-deadline').value = t.deadline
+    ? (t.deadline.length > 10 ? t.deadline.substring(0,16) : t.deadline)
+    : '';
+  document.getElementById('fe-urgent').checked = !!t.urgent;
+  document.getElementById('fe-notes').value    = t.notes || '';
+  document.getElementById('fe-source').value   = t.source || '';
+  document.getElementById('editTaskModal').classList.add('open');
+  setTimeout(() => document.getElementById('fe-title').focus(), 50);
+}
+function closeEditModal() {
+  document.getElementById('editTaskModal').classList.remove('open');
+  _editingId = null;
+}
+function onEditOverlayClick(e) {
+  if (e.target === document.getElementById('editTaskModal')) closeEditModal();
+}
+function submitEditForm() {
+  if (!_editingId) return;
+  const title = document.getElementById('fe-title').value.trim();
+  if (!title) { document.getElementById('fe-title').focus(); return; }
+
+  const fields = {
+    title,
+    category: document.getElementById('fe-category').value,
+    deadline: document.getElementById('fe-deadline').value || null,
+    urgent:   document.getElementById('fe-urgent').checked,
+    notes:    document.getElementById('fe-notes').value.trim() || null,
+    source:   document.getElementById('fe-source').value.trim(),
+  };
+
+  const t = APP_DATA.tasks.find(x => x.id === _editingId);
+  if (t) Object.assign(t, fields);
+
+  if (t && t._manual) {
+    const tasks = getManualTasks().map(m => m.id === _editingId ? {...m, ...fields} : m);
+    saveManualTasks(tasks);
+  } else {
+    saveEdit(_editingId, fields);
+  }
+
+  closeEditModal();
+  renderAll();
 }
 
 // ============================================================
@@ -1782,13 +2263,118 @@ function submitAddTaskForm() {
 }
 // Escキーでモーダルを閉じる
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeAddTaskModal();
+  if (e.key === 'Escape') { closeAddTaskModal(); closeEditModal(); closeAddEventModal(); }
 });
 
-applyStoredStates();
 loadManualTasks();
+loadManualEvents();
+applyStoredStates();
+applyStoredEdits();
 renderAll();
 </script>
+
+<!-- ── タスク編集モーダル ── -->
+<div class="modal-overlay" id="editTaskModal" onclick="onEditOverlayClick(event)">
+  <div class="modal-card">
+    <div class="modal-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      タスクを編集
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">タイトル<span class="req">*</span></label>
+      <input id="fe-title" class="form-input" type="text" maxlength="80">
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">出所</label>
+      <input id="fe-source" class="form-input" type="text" placeholder="連絡No. またはメール差出人">
+    </div>
+
+    <div class="form-row-inline">
+      <div class="form-row">
+        <label class="form-label">カテゴリ</label>
+        <select id="fe-category" class="form-select">
+          <option value="対応">対応</option>
+          <option value="報告">報告</option>
+          <option value="確認">確認</option>
+          <option value="連絡">連絡</option>
+          <option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">期限</label>
+        <input id="fe-deadline" class="form-input" type="datetime-local">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-check">
+        <input id="fe-urgent" type="checkbox">
+        <span class="form-check-label">緊急フラグを立てる</span>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">メモ・備考</label>
+      <textarea id="fe-notes" class="form-textarea" placeholder="対応内容や注意事項など"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-cancel-btn" onclick="closeEditModal()">キャンセル</button>
+      <button class="modal-submit-btn" onclick="submitEditForm()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── イベント追加モーダル ── -->
+<div class="modal-overlay" id="addEventModal" onclick="onEventModalClick(event)">
+  <div class="modal-card">
+    <div class="modal-title" style="color:var(--cyan);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      イベントを追加
+      <button class="modal-close" onclick="closeAddEventModal()">✕</button>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">タイトル<span class="req">*</span></label>
+      <input id="fev-title" class="form-input" type="text" placeholder="例：○○ミーティング、打合せ" maxlength="80">
+    </div>
+
+    <div class="form-row-inline">
+      <div class="form-row">
+        <label class="form-label">日時<span class="req">*</span></label>
+        <input id="fev-date" class="form-input" type="datetime-local">
+      </div>
+      <div class="form-row">
+        <label class="form-label">終了時刻</label>
+        <input id="fev-end" class="form-input" type="time" placeholder="例：15:00">
+      </div>
+    </div>
+
+    <div class="form-row-inline">
+      <div class="form-row">
+        <label class="form-label">場所・方法</label>
+        <input id="fev-loc" class="form-input" type="text" placeholder="例：Teams、会議室A">
+      </div>
+      <div class="form-row">
+        <label class="form-label">出所</label>
+        <input id="fev-source" class="form-input" type="text" placeholder="例：連絡No.">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">メモ・詳細</label>
+      <textarea id="fev-notes" class="form-textarea" placeholder="議題・持参資料など（任意）"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-cancel-btn" onclick="closeAddEventModal()">キャンセル</button>
+      <button class="modal-submit-btn" onclick="submitAddEventForm()" style="background:var(--cyan);box-shadow:0 2px 8px rgba(8,145,178,.3);">追加する</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── タスク追加モーダル ── -->
 <div class="modal-overlay" id="addTaskModal" onclick="onModalOverlayClick(event)">
