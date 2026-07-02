@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>冨澤用ポータル</title>
 <script src="data.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <style>
 /* ============================================================
    Design System
@@ -1391,7 +1393,7 @@ const IC_STAR    = `<svg width="12" height="12" viewBox="0 0 24 24" fill="curren
 const IC_CAL     = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
 
 // ============================================================
-// localStorage
+// localStorage / Firestore 同期
 // ============================================================
 const LS_STATE          = 'workplace_report_states_v1';
 const LS_TODAY          = 'workplace_today_v1';
@@ -1401,7 +1403,80 @@ const LS_EDITS          = 'workplace_task_edits_v1';
 const LS_MANUAL_EVENTS  = 'workplace_manual_events_v1';
 
 function lsGet(key)       { try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; } }
-function lsSet(key, val)  { localStorage.setItem(key, JSON.stringify(val)); }
+function lsSet(key, val)  { localStorage.setItem(key, JSON.stringify(val)); _scheduleFirestoreSync(); }
+
+// ── Firebase 初期化 ──
+const _fbApp = firebase.initializeApp({
+  apiKey:            "AIzaSyCbO80gC8haR-zxhpyGLrgUau2JI_sm3MY",
+  authDomain:        "personal-portal-7d8f7.firebaseapp.com",
+  projectId:         "personal-portal-7d8f7",
+  storageBucket:     "personal-portal-7d8f7.firebasestorage.app",
+  messagingSenderId: "1030243579322",
+  appId:             "1:1030243579322:web:920a69d39f579557731983"
+});
+const _db        = firebase.firestore(_fbApp);
+const _FSREF     = _db.collection('portal_state').doc('main');
+let _suppressSnap = false;
+let _syncTimer    = null;
+
+function _scheduleFirestoreSync() {
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(_syncToFirestore, 800);
+}
+
+function _syncToFirestore() {
+  const payload = {
+    states:        lsGet(LS_STATE),
+    today:         lsGet(LS_TODAY),
+    memo:          lsGet(LS_MEMO),
+    hiddenNotices: lsGet(LS_HIDDEN_NOTICES),
+    edits:         lsGet(LS_EDITS),
+    manualTasks:   (() => { try { return JSON.parse(localStorage.getItem(LS_MANUAL)||'[]'); } catch { return []; } })(),
+    manualEvents:  (() => { try { return JSON.parse(localStorage.getItem(LS_MANUAL_EVENTS)||'[]'); } catch { return []; } })()
+  };
+  _suppressSnap = true;
+  _FSREF.set(payload).then(() => { setTimeout(() => { _suppressSnap = false; }, 1500); })
+                     .catch(e => { console.warn('Firestore書き込みエラー:', e); _suppressSnap = false; });
+}
+
+async function _loadFromFirestore() {
+  try {
+    const snap = await _FSREF.get();
+    if (!snap.exists) return;
+    const d = snap.data();
+    if (d.states)        localStorage.setItem(LS_STATE,          JSON.stringify(d.states));
+    if (d.today)         localStorage.setItem(LS_TODAY,          JSON.stringify(d.today));
+    if (d.memo)          localStorage.setItem(LS_MEMO,           JSON.stringify(d.memo));
+    if (d.hiddenNotices) localStorage.setItem(LS_HIDDEN_NOTICES, JSON.stringify(d.hiddenNotices));
+    if (d.edits)         localStorage.setItem(LS_EDITS,          JSON.stringify(d.edits));
+    if (d.manualTasks)   localStorage.setItem(LS_MANUAL,         JSON.stringify(d.manualTasks));
+    if (d.manualEvents)  localStorage.setItem(LS_MANUAL_EVENTS,  JSON.stringify(d.manualEvents));
+  } catch(e) {
+    console.warn('Firestore読み込みエラー（localStorage で続行）:', e);
+  }
+}
+
+function _setupFirestoreListener() {
+  _FSREF.onSnapshot(snap => {
+    if (_suppressSnap || !snap.exists) return;
+    const d = snap.data();
+    if (d.states)        localStorage.setItem(LS_STATE,          JSON.stringify(d.states));
+    if (d.today)         localStorage.setItem(LS_TODAY,          JSON.stringify(d.today));
+    if (d.memo)          localStorage.setItem(LS_MEMO,           JSON.stringify(d.memo));
+    if (d.hiddenNotices) localStorage.setItem(LS_HIDDEN_NOTICES, JSON.stringify(d.hiddenNotices));
+    if (d.edits)         localStorage.setItem(LS_EDITS,          JSON.stringify(d.edits));
+    if (d.manualTasks)   localStorage.setItem(LS_MANUAL,         JSON.stringify(d.manualTasks));
+    if (d.manualEvents)  localStorage.setItem(LS_MANUAL_EVENTS,  JSON.stringify(d.manualEvents));
+    // 別デバイスからの変更を反映
+    APP_DATA.tasks  = APP_DATA.tasks.filter(t => !t.id.startsWith('manual_'));
+    APP_DATA.events = (APP_DATA.events||[]).filter(e => !e.id.startsWith('ev_manual_'));
+    loadManualTasks();
+    loadManualEvents();
+    applyStoredStates();
+    applyStoredEdits();
+    renderAll();
+  });
+}
 
 function saveState(id, status)  { const s = lsGet(LS_STATE); s[id] = { status, at: new Date().toISOString() }; lsSet(LS_STATE, s); }
 function clearState(id)         { const s = lsGet(LS_STATE); delete s[id]; lsSet(LS_STATE, s); }
@@ -2307,11 +2382,15 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeAddTaskModal(); closeEditModal(); closeAddEventModal(); }
 });
 
-loadManualTasks();
-loadManualEvents();
-applyStoredStates();
-applyStoredEdits();
-renderAll();
+(async () => {
+  await _loadFromFirestore();
+  loadManualTasks();
+  loadManualEvents();
+  applyStoredStates();
+  applyStoredEdits();
+  renderAll();
+  _setupFirestoreListener();
+})();
 </script>
 
 <!-- ── タスク編集モーダル ── -->

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>今日やること</title>
 <script src="data.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <style>
 :root {
   --indigo:     #4f46e5;
@@ -429,7 +431,55 @@ const IC_CAL   = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" st
 const IC_CHEV  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>`;
 
 function lsGet(key) { try { return JSON.parse(localStorage.getItem(key)||'{}'); } catch { return {}; } }
-function lsSet(key,v){ localStorage.setItem(key,JSON.stringify(v)); }
+function lsSet(key,v){ localStorage.setItem(key,JSON.stringify(v)); _scheduleFirestoreSync(); }
+
+// ── Firebase（index.htmlと共有の設定）──
+const _fbApp = firebase.initializeApp({
+  apiKey:            "AIzaSyCbO80gC8haR-zxhpyGLrgUau2JI_sm3MY",
+  authDomain:        "personal-portal-7d8f7.firebaseapp.com",
+  projectId:         "personal-portal-7d8f7",
+  storageBucket:     "personal-portal-7d8f7.firebasestorage.app",
+  messagingSenderId: "1030243579322",
+  appId:             "1:1030243579322:web:920a69d39f579557731983"
+}, 'today');
+const _db        = firebase.firestore(_fbApp);
+const _FSREF     = _db.collection('portal_state').doc('main');
+let _suppressSnap = false;
+let _syncTimer    = null;
+
+function _scheduleFirestoreSync() {
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(_syncToFirestore, 800);
+}
+function _syncToFirestore() {
+  const payload = {
+    states:        lsGet(LS_STATE),
+    today:         lsGet(LS_TODAY),
+    memo:          lsGet(LS_MEMO),
+    manualTasks:   (() => { try { return JSON.parse(localStorage.getItem(LS_MANUAL)||'[]'); } catch { return []; } })(),
+    manualEvents:  (() => { try { return JSON.parse(localStorage.getItem(LS_MANUAL_EVENTS)||'[]'); } catch { return []; } })(),
+    edits:         lsGet(LS_EDITS)
+  };
+  _suppressSnap = true;
+  _FSREF.set(payload, { merge: true })
+        .then(() => { setTimeout(() => { _suppressSnap = false; }, 1500); })
+        .catch(e => { console.warn('Firestore書き込みエラー:', e); _suppressSnap = false; });
+}
+async function _loadFromFirestore() {
+  try {
+    const snap = await _FSREF.get();
+    if (!snap.exists) return;
+    const d = snap.data();
+    if (d.states)      localStorage.setItem(LS_STATE,  JSON.stringify(d.states));
+    if (d.today)       localStorage.setItem(LS_TODAY,  JSON.stringify(d.today));
+    if (d.memo)        localStorage.setItem(LS_MEMO,   JSON.stringify(d.memo));
+    if (d.edits)       localStorage.setItem(LS_EDITS,  JSON.stringify(d.edits));
+    if (d.manualTasks) localStorage.setItem(LS_MANUAL, JSON.stringify(d.manualTasks));
+    if (d.manualEvents)localStorage.setItem(LS_MANUAL_EVENTS, JSON.stringify(d.manualEvents));
+  } catch(e) {
+    console.warn('Firestore読み込みエラー（localStorage で続行）:', e);
+  }
+}
 
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 
@@ -691,9 +741,12 @@ function escHtml(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-loadAllTasks();
-loadAllEvents();
-renderAll();
+(async () => {
+  await _loadFromFirestore();
+  loadAllTasks();
+  loadAllEvents();
+  renderAll();
+})();
 </script>
 </body>
 </html>
