@@ -468,7 +468,7 @@ function _syncToFirestore() {
 async function _loadFromFirestore() {
   try {
     const snap = await _FSREF.get();
-    if (!snap.exists) return;
+    if (!snap.exists) return false;
     const d = snap.data();
     if (d.states)      localStorage.setItem(LS_STATE,  JSON.stringify(d.states));
     if (d.today)       localStorage.setItem(LS_TODAY,  JSON.stringify(d.today));
@@ -476,8 +476,10 @@ async function _loadFromFirestore() {
     if (d.edits)       localStorage.setItem(LS_EDITS,  JSON.stringify(d.edits));
     if (d.manualTasks) localStorage.setItem(LS_MANUAL, JSON.stringify(d.manualTasks));
     if (d.manualEvents)localStorage.setItem(LS_MANUAL_EVENTS, JSON.stringify(d.manualEvents));
+    return true;
   } catch(e) {
     console.warn('Firestore読み込みエラー（localStorage で続行）:', e);
+    return false;
   }
 }
 
@@ -742,10 +744,11 @@ function escHtml(s) {
 }
 
 (async () => {
-  await _loadFromFirestore();
+  const hadRemoteData = await _loadFromFirestore();
   loadAllTasks();
   loadAllEvents();
   renderAll();
+  if (!hadRemoteData) _syncToFirestore();
 })();
 </script>
 </body>
