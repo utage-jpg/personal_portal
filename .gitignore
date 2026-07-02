@@ -1,0 +1,6 @@
+# Claude Code ローカル設定（個人端末固有）
+.claude/
+
+# OS 生成ファイル
+Thumbs.db
+.DS_Store

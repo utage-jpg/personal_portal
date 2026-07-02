@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今日やること</title>
+<script src="data.js"></script>
+<style>
+:root {
+  --indigo:     #4f46e5;
+  --indigo-lt:  #eef2ff;
+  --cyan:       #0891b2;
+  --cyan-lt:    #ecfeff;
+  --rose:       #f43f5e;
+  --amber:      #d97706;
+  --emerald:    #059669;
+  --emerald-lt: #ecfdf5;
+  --emerald-bd: #a7f3d0;
+  --overdue:    #dc2626;
+  --urgent:     #ea580c;
+  --soon:       #d97706;
+  --today-c:    #f97316;
+  --today-bg:   #fff7ed;
+  --today-bd:   #fed7aa;
+  --bg:         #f4f7ff;
+  --surface:    #ffffff;
+  --border:     #e5e7eb;
+  --border-lt:  #f3f4f6;
+  --text:       #111827;
+  --text-sub:   #374151;
+  --muted:      #6b7280;
+  --muted-lt:   #9ca3af;
+  --radius-sm:  8px;
+  --radius:     12px;
+  --shadow-sm:  0 1px 4px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Hiragino Kaku Gothic ProN', 'Yu Gothic UI', 'Meiryo UI', Meiryo, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  padding-bottom: 48px;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, #4f46e5 0%, #0891b2 100%);
+  height: 56px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,.18);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 7px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.back-btn:hover { background: rgba(255,255,255,.28); }
+.header-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -.01em;
+  flex: 1;
+}
+.header-date {
+  font-size: 11px;
+  color: rgba(255,255,255,.75);
+  white-space: nowrap;
+}
+
+/* ── Progress bar ── */
+.progress-section {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.progress-count {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--today-c);
+  white-space: nowrap;
+  line-height: 1;
+  min-width: 44px;
+  text-align: center;
+}
+.progress-sub { font-size: 9px; color: var(--muted); text-align: center; margin-top: 1px; }
+.progress-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: var(--today-bd);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--today-c), #fb923c);
+  border-radius: 99px;
+  transition: width .4s ease;
+}
+.progress-done-label {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ── Content ── */
+.content {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Section label ── */
+.section-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.section-label::before {
+  content: '';
+  display: block;
+  width: 3px; height: 13px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.section-label.cyan::before  { background: var(--cyan); }
+.section-label.orange::before { background: var(--today-c); }
+
+/* ── イベントリスト（今日）── */
+.event-list-today { list-style: none; display: flex; flex-direction: column; }
+.event-today-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  background: var(--cyan-lt);
+  border: 1px solid #cffafe;
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+  transition: box-shadow .12s;
+}
+.event-today-item:last-child { margin-bottom: 0; }
+.event-today-item:hover { box-shadow: 0 2px 8px rgba(8,145,178,.12); }
+.event-icon {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  background: var(--cyan);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+.event-today-main { flex: 1; min-width: 0; }
+.event-today-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.event-today-sub {
+  font-size: 11px;
+  color: var(--cyan);
+  font-weight: 600;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── タスクリスト ── */
+.todo-list { list-style: none; display: flex; flex-direction: column; }
+.todo-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 8px;
+  transition: box-shadow .15s;
+}
+.todo-card:last-child { margin-bottom: 0; }
+.todo-card:hover { box-shadow: 0 2px 12px rgba(17,24,39,.08); }
+.todo-card.done { opacity: .6; }
+
+/* 期限による左ボーダー */
+.todo-card.overdue { border-left: 3px solid var(--overdue); }
+.todo-card.urgent  { border-left: 3px solid var(--urgent); }
+.todo-card.soon    { border-left: 3px solid var(--amber); }
+.todo-card.normal  { border-left: 3px solid var(--indigo); }
+.todo-card.done    { border-left: 3px solid var(--emerald); }
+
+.todo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: default;
+}
+
+/* サークルチェックボックス */
+.todo-check {
+  width: 24px; height: 24px; flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--muted-lt);
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, background .15s;
+  padding: 0; color: transparent;
+}
+.todo-check:hover { border-color: var(--indigo); }
+.todo-card.done .todo-check {
+  border-color: var(--emerald);
+  background: var(--emerald);
+  color: #fff;
+}
+
+.todo-main { flex: 1; min-width: 0; }
+.todo-title {
+  font-size: 14px; font-weight: 600; color: var(--text);
+  display: block;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.4;
+}
+.todo-card.done .todo-title { text-decoration: line-through; color: var(--muted); }
+.todo-sub {
+  font-size: 11px; color: var(--muted); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.todo-deadline {
+  font-size: 11px; font-weight: 700;
+  white-space: nowrap; flex-shrink: 0;
+}
+.todo-deadline.overdue { color: var(--overdue); }
+.todo-deadline.urgent  { color: var(--urgent); }
+.todo-deadline.soon    { color: var(--amber); }
+.todo-deadline.normal  { color: var(--muted); }
+
+.todo-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: center;
+}
+.btn-sm {
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-sm:hover { background: var(--border); color: var(--text); }
+.btn-unpin { border-color: #ddd6fe; background: #f5f3ff; color: #7c3aed; }
+.btn-unpin:hover { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+.btn-expand {
+  width: 28px; height: 28px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.btn-expand svg { transition: transform .2s; }
+.todo-card.open .btn-expand svg { transform: rotate(180deg); }
+
+/* 詳細本文 */
+.todo-body {
+  display: none;
+  padding: 0 14px 14px 50px;
+  border-top: 1px solid var(--border-lt);
+  background: var(--bg);
+}
+.todo-card.open .todo-body { display: block; }
+.todo-notes {
+  font-size: 12px; line-height: 1.75; color: var(--text-sub);
+  white-space: pre-wrap;
+  background: var(--surface);
+  border-radius: 6px; padding: 10px 12px;
+  border: 1px solid var(--border);
+  margin: 10px 0 8px;
+}
+.todo-source {
+  font-size: 10.5px; color: var(--muted-lt);
+  padding-top: 8px; border-top: 1px dashed var(--border);
+}
+
+/* メモ */
+.memo-section {
+  margin-top: 8px;
+  background: #fffdf0;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.memo-label { font-size: 10px; font-weight: 800; color: #92400e; margin-bottom: 6px; }
+.memo-textarea {
+  width: 100%;
+  min-height: 72px;
+  border: 1px solid #fde68a;
+  border-radius: 5px;
+  padding: 7px 9px;
+  font-size: 12px;
+  font-family: inherit;
+  resize: vertical;
+  background: #fffff8;
+  color: var(--text);
+  outline: none;
+  line-height: 1.6;
+}
+.memo-textarea:focus { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(217,119,6,.15); }
+.memo-footer { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.btn-save-memo {
+  font-size: 11px; font-weight: 700;
+  padding: 4px 12px; border-radius: 5px;
+  border: 1px solid #fde68a; background: #fef9c3; color: #92400e;
+  cursor: pointer; font-family: inherit; transition: opacity .15s;
+}
+.btn-save-memo:hover { opacity: .75; }
+.memo-saved { font-size: 11px; color: var(--emerald); display: none; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted);
+}
+.empty-state p { font-size: 14px; line-height: 1.8; margin-bottom: 16px; }
+.empty-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--indigo); color: #fff;
+  padding: 10px 22px; border-radius: 8px;
+  text-decoration: none; font-size: 13px; font-weight: 700;
+  transition: opacity .15s;
+}
+.empty-link:hover { opacity: .85; }
+
+/* ── モバイル ── */
+@media (max-width: 600px) {
+  .header { padding: 0 14px; height: 52px; }
+  .header-title { font-size: 14px; }
+  .header-date { display: none; }
+  .back-btn { padding: 4px 10px; font-size: 11px; }
+  .progress-section { padding: 10px 14px; gap: 10px; }
+  .progress-count { font-size: 18px; min-width: 38px; }
+  .content { padding: 14px 12px 32px; gap: 16px; }
+  .todo-row { padding: 11px 12px; gap: 10px; }
+  .todo-title { font-size: 13.5px; }
+  .todo-body { padding: 0 12px 12px 46px; }
+  .btn-sm { font-size: 10.5px; padding: 4px 8px; }
+  .event-today-item { padding: 10px; gap: 10px; }
+  .event-icon { width: 30px; height: 30px; border-radius: 8px; }
+  .event-today-title { font-size: 13.5px; }
+  /* iOS フォーム zoom 防止 */
+  .memo-textarea { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="index.html" class="back-btn">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+    戻る
+  </a>
+  <div class="header-title">今日やること</div>
+  <div class="header-date" id="headerDate"></div>
+</header>
+
+<div class="progress-section">
+  <div style="display:flex;flex-direction:column;align-items:center;">
+    <div class="progress-count" id="progressCount">0/0</div>
+    <div class="progress-sub">完了/合計</div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+  </div>
+  <div class="progress-done-label" id="progressDoneLabel">完了 0件</div>
+</div>
+
+<div class="content" id="content"></div>
+
+<script>
+const LS_STATE         = 'workplace_report_states_v1';
+const LS_TODAY         = 'workplace_today_v1';
+const LS_MEMO          = 'workplace_memos_v1';
+const LS_MANUAL        = 'workplace_manual_tasks_v1';
+const LS_EDITS         = 'workplace_task_edits_v1';
+const LS_MANUAL_EVENTS = 'workplace_manual_events_v1';
+
+const IC_CHECK = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const IC_CAL   = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
+const IC_CHEV  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+
+function lsGet(key) { try { return JSON.parse(localStorage.getItem(key)||'{}'); } catch { return {}; } }
+function lsSet(key,v){ localStorage.setItem(key,JSON.stringify(v)); }
+
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+
+// ── タスク関連ユーティリティ ──
+function loadAllTasks() {
+  const manual = JSON.parse(localStorage.getItem(LS_MANUAL)||'[]');
+  manual.forEach(t => { if (!APP_DATA.tasks.find(x=>x.id===t.id)) APP_DATA.tasks.push(t); });
+  const edits = lsGet(LS_EDITS);
+  APP_DATA.tasks.forEach(t => { if (edits[t.id]) Object.assign(t, edits[t.id]); });
+  const states = lsGet(LS_STATE);
+  APP_DATA.tasks.forEach(t => {
+    if (states[t.id]) {
+      const v = states[t.id];
+      t.status = typeof v === 'string' ? v : v.status;
+    }
+  });
+}
+
+function loadAllEvents() {
+  const manual = JSON.parse(localStorage.getItem(LS_MANUAL_EVENTS)||'[]');
+  if (!APP_DATA.events) APP_DATA.events = [];
+  manual.forEach(ev => { if (!APP_DATA.events.find(x=>x.id===ev.id)) APP_DATA.events.push(ev); });
+}
+
+function isDone(id) {
+  const v = lsGet(LS_STATE)[id];
+  return v === '完了' || v?.status === '完了';
+}
+function isTodayTask(id)  { return !!lsGet(LS_TODAY)[id]; }
+function getMemo(id)      { return lsGet(LS_MEMO)[id] || ''; }
+
+function setDone(id, done) {
+  const s = lsGet(LS_STATE);
+  if (done) s[id] = { status:'完了', at: new Date().toISOString() }; else delete s[id];
+  lsSet(LS_STATE, s);
+  const t = APP_DATA.tasks.find(x=>x.id===id);
+  if (t) t.status = done ? '完了' : '未対応';
+}
+function removeToday(id) {
+  const s = lsGet(LS_TODAY);
+  delete s[id]; lsSet(LS_TODAY, s);
+}
+
+function dayDiff(str) {
+  if (!str) return null;
+  const d = new Date(str); d.setHours(0,0,0,0);
+  return Math.ceil((d - TODAY) / 86400000);
+}
+
+function taskState(t) {
+  if (t.status === '完了' || isDone(t.id)) return 'done';
+  if (t.urgent && !t.deadline) return 'urgent';
+  const diff = dayDiff(t.deadline);
+  if (diff === null) return 'urgent';
+  if (diff < 0)  return 'overdue';
+  if (diff <= 7) return 'soon';
+  return 'normal';
+}
+
+function isDeadlineToday(t) { return dayDiff(t.deadline) === 0; }
+
+function fmtDeadlineShort(t) {
+  if (!t.deadline) return null;
+  const d = new Date(t.deadline);
+  const diff = dayDiff(t.deadline);
+  let s = `${d.getMonth()+1}/${d.getDate()}`;
+  if (diff < 0)       s += `（${Math.abs(diff)}日超過）`;
+  else if (diff === 0) s += '（本日）';
+  else if (diff <= 7)  s += `（残${diff}日）`;
+  return s;
+}
+
+// ── イベント関連 ──
+function isEventToday(ev) {
+  if (!ev.date) return false;
+  const d = new Date(ev.date); d.setHours(0,0,0,0);
+  return d.getTime() === TODAY.getTime();
+}
+
+function fmtEventTime(ev) {
+  const d = new Date(ev.date);
+  if (!d.getHours() && !d.getMinutes()) return '終日';
+  let s = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  if (ev.endTime) s += `〜${ev.endTime}`;
+  return s;
+}
+
+// ── 描画 ──
+function toggleCard(id) {
+  document.getElementById('tcard-'+id)?.classList.toggle('open');
+}
+
+function handleComplete(id) {
+  setDone(id, !isDone(id));
+  renderAll();
+}
+
+function handleRemoveToday(id) {
+  removeToday(id);
+  renderAll();
+}
+
+function saveMemo(id) {
+  const ta  = document.getElementById('memo-ta-'+id);
+  if (!ta) return;
+  const txt = ta.value.trim();
+  const s   = lsGet(LS_MEMO);
+  if (txt) s[id] = txt; else delete s[id];
+  lsSet(LS_MEMO, s);
+  const msg = document.getElementById('memo-saved-'+id);
+  if (msg) { msg.style.display='inline'; setTimeout(()=>msg.style.display='none', 2000); }
+}
+
+function renderProgress(tasks) {
+  const total = tasks.length;
+  const done  = tasks.filter(t => isDone(t.id) || t.status==='完了').length;
+  const pct   = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('progressCount').textContent = `${done}/${total}`;
+  document.getElementById('progressBar').style.width   = pct + '%';
+  document.getElementById('progressDoneLabel').textContent = `完了 ${done}件`;
+}
+
+function renderAll() {
+  // ヘッダー日付
+  const now = new Date();
+  const dow = ['日','月','火','水','木','金','土'][now.getDay()];
+  document.getElementById('headerDate').textContent = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日（${dow}）`;
+
+  const todayIds   = lsGet(LS_TODAY);
+  const todayTasks = APP_DATA.tasks.filter(t => {
+    if (!todayIds[t.id] && !isDeadlineToday(t)) return false;
+    if ((isDone(t.id) || t.status === '完了') && dayDiff(t.deadline) !== null && dayDiff(t.deadline) < 0) return false;
+    return true;
+  });
+  const todayEvs   = (APP_DATA.events||[])
+    .filter(isEventToday)
+    .sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+  renderProgress(todayTasks);
+
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+
+  if (todayTasks.length === 0 && todayEvs.length === 0) {
+    content.innerHTML = `
+      <div class="empty-state">
+        <p>今日やることが登録されていません。<br>トップページのタスク一覧から ⭐ を押して追加できます。</p>
+        <a href="index.html" class="empty-link">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+          トップへ戻る
+        </a>
+      </div>`;
+    return;
+  }
+
+  // ── 本日のイベント ──
+  if (todayEvs.length > 0) {
+    const evSec = document.createElement('div');
+    const evLabel = document.createElement('div');
+    evLabel.className = 'section-label cyan';
+    evLabel.textContent = '本日のイベント';
+    evSec.appendChild(evLabel);
+
+    const ul = document.createElement('ul');
+    ul.className = 'event-list-today';
+    todayEvs.forEach(ev => {
+      const timeStr = fmtEventTime(ev);
+      const li = document.createElement('li');
+      li.className = 'event-today-item';
+      li.innerHTML = `
+        <div class="event-icon">${IC_CAL}</div>
+        <div class="event-today-main">
+          <div class="event-today-title">${ev.title}</div>
+          <div class="event-today-sub">${timeStr}${ev.location ? '　📍'+ev.location : ''}${ev.notes ? '　'+ev.notes.split('\n')[0] : ''}</div>
+        </div>
+      `;
+      ul.appendChild(li);
+    });
+    evSec.appendChild(ul);
+    content.appendChild(evSec);
+  }
+
+  // ── タスク ──
+  if (todayTasks.length > 0) {
+    const taskSec = document.createElement('div');
+    if (todayEvs.length > 0) {
+      const taskLabel = document.createElement('div');
+      taskLabel.className = 'section-label orange';
+      taskLabel.textContent = 'タスク';
+      taskSec.appendChild(taskLabel);
+    }
+
+    const sorted = [...todayTasks].sort((a,b) => {
+      const da = (isDone(a.id)||a.status==='完了') ? 1 : 0;
+      const db = (isDone(b.id)||b.status==='完了') ? 1 : 0;
+      if (da !== db) return da - db;
+      if (a.deadline && b.deadline) return new Date(a.deadline)-new Date(b.deadline);
+      if (a.deadline) return -1; if (b.deadline) return 1;
+      return 0;
+    });
+
+    const ul = document.createElement('ul');
+    ul.className = 'todo-list';
+
+    sorted.forEach(t => {
+      const state  = taskState(t);
+      const done   = state === 'done';
+      const dl     = fmtDeadlineShort(t);
+      const memo   = getMemo(t.id);
+      const pinned = isTodayTask(t.id);
+
+      const li = document.createElement('li');
+      li.className = `todo-card ${state}${done?' done':''}`;
+      li.id = 'tcard-'+t.id;
+
+      const dlMap = { overdue:'overdue', urgent:'urgent', soon:'soon', normal:'normal', done:'normal' };
+      const dlCls = t.urgent&&!t.deadline ? 'urgent' : (dlMap[state]||'');
+
+      li.innerHTML = `
+        <div class="todo-row">
+          <button class="todo-check" onclick="handleComplete('${t.id}')" title="${done?'未対応に戻す':'完了にする'}">${done?IC_CHECK:''}</button>
+          <div class="todo-main">
+            <span class="todo-title">${t.title}</span>
+            <span class="todo-sub">${t.source||''}</span>
+          </div>
+          ${t.urgent&&!t.deadline
+            ? `<span class="todo-deadline urgent">⚡緊急</span>`
+            : dl ? `<span class="todo-deadline ${dlCls}">${dl}</span>` : ''}
+          <div class="todo-actions">
+            ${pinned ? `<button class="btn-sm btn-unpin" onclick="handleRemoveToday('${t.id}')" title="今日やることから外す">外す</button>` : ''}
+            <button class="btn-sm btn-expand" onclick="toggleCard('${t.id}')" title="詳細">${IC_CHEV}</button>
+          </div>
+        </div>
+        <div class="todo-body">
+          ${t.notes ? `<div class="todo-notes">${t.notes}</div>` : ''}
+          <div class="memo-section">
+            <div class="memo-label">📝 メモ</div>
+            <textarea class="memo-textarea" id="memo-ta-${t.id}"
+              placeholder="メモを入力…"
+              onkeydown="if(event.ctrlKey&&event.key==='Enter')saveMemo('${t.id}')"
+            >${escHtml(memo)}</textarea>
+            <div class="memo-footer">
+              <button class="btn-save-memo" onclick="saveMemo('${t.id}')">保存</button>
+              <span class="memo-saved" id="memo-saved-${t.id}">保存済 ✓</span>
+            </div>
+          </div>
+          <div class="todo-source">${t.sourceFile?'📂 '+t.sourceFile+'　':''} 登録日：${t.addedDate||''}</div>
+        </div>
+      `;
+      ul.appendChild(li);
+    });
+
+    taskSec.appendChild(ul);
+    content.appendChild(taskSec);
+  }
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+loadAllTasks();
+loadAllEvents();
+renderAll();
+</script>
+</body>
+</html>
